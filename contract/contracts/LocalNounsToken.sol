@@ -8,8 +8,8 @@ pragma solidity ^0.8.6;
 
 import '@openzeppelin/contracts/utils/Strings.sol';
 import './libs/ProviderTokenA1.sol';
-import { INounsSeeder } from './sushi/interfaces/INounsSeeder.sol';
-import './sushi/interfaces/IAssetProviderExMint.sol';
+import { INounsSeeder } from './localNouns/interfaces/INounsSeeder.sol';
+import './localNouns/interfaces/IAssetProviderExMint.sol';
 
 contract LocalNounsToken is ProviderTokenA1 {
   using Strings for uint256;
@@ -67,9 +67,9 @@ contract LocalNounsToken is ProviderTokenA1 {
         )
       );
   }
-  function mint() public payable virtual override returns (uint256 tokenId) {
+  function mint(uint256 prefectureId) public payable virtual override returns (uint256 tokenId) {
       require(msg.value >= mintPrice, 'Must send the mint price');
-      assetProvider2.mint(_nextTokenId());
+      assetProvider2.mint(prefectureId, _nextTokenId());
       super.mint();
       address payable payableTo = payable(committee);
       payableTo.transfer(address(this).balance);
