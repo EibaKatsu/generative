@@ -38,7 +38,11 @@ interface INounsDescriptorMinimal {
 
     function accessoryCount() external view returns (uint256);
 
+    function accessoryCountInPrefecture(uint256 prefectureId) external view returns (uint256);
+
     function headCount() external view returns (uint256);
 
+    function headCountInPrefecture(uint256 prefectureId) external view returns (uint256);
+    
     function glassesCount() external view returns (uint256);
 }
