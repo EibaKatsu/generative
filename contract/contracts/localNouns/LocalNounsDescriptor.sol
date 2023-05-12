@@ -61,9 +61,16 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
     // Noun Glasses (Custom RLE)
     bytes[] public override glasses;
 
+    // prefectureId => parts index of heads
+    mapping (uint256 => uint256[]) public prefectureHeads;
+
+    // prefectureId => parts index of accessories
+    mapping (uint256 => uint256[]) public prefectureAccessories;
+
     constructor(INounsDescriptor _descriptor) {
         descriptor = _descriptor;
     }
+    
     /**
      * @notice Require that the parts have not been locked.
      */
@@ -95,10 +102,24 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
     }
 
     /**
+     * @notice Get the number of available Noun `accessories` in the prefecture.
+     */
+    function accessoryCountInPrefecture(uint256 prefectureId) external view override returns (uint256) {
+        return prefectureAccessories(prefectureId).length;
+    }
+
+    /**
      * @notice Get the number of available Noun `heads`.
      */
     function headCount() external view override returns (uint256) {
         return heads.length;
+    }
+
+    /**
+     * @notice Get the number of available Noun `heads` in the prefecture.
+     */
+    function headCountInPrefecture(uint256 prefectureId) external view override returns (uint256) {
+        return prefectureHeads(prefectureId).length;
     }
 
     /**
@@ -144,9 +165,9 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
      * @notice Batch add Noun accessories.
      * @dev This function can only be called by the owner when not locked.
      */
-    function addManyAccessories(bytes[] calldata _accessories) external override onlyOwner whenPartsNotLocked {
+    function addManyAccessories(uint256 prefectureId, bytes[] calldata _accessories) external override onlyOwner whenPartsNotLocked {
         for (uint256 i = 0; i < _accessories.length; i++) {
-            _addAccessory(_accessories[i]);
+            _addAccessory(prefectureId, _accessories[i]);
         }
     }
 
@@ -154,9 +175,9 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
      * @notice Batch add Noun heads.
      * @dev This function can only be called by the owner when not locked.
      */
-    function addManyHeads(bytes[] calldata _heads) external override onlyOwner whenPartsNotLocked {
+    function addManyHeads(uint256 prefectureId, bytes[] calldata _heads) external override onlyOwner whenPartsNotLocked {
         for (uint256 i = 0; i < _heads.length; i++) {
-            _addHead(_heads[i]);
+            _addHead(prefectureId, _heads[i]);
         }
     }
 
@@ -199,16 +220,16 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
      * @notice Add a Noun accessory.
      * @dev This function can only be called by the owner when not locked.
      */
-    function addAccessory(bytes calldata _accessory) external override onlyOwner whenPartsNotLocked {
-        _addAccessory(_accessory);
+    function addAccessory(uint256 prefectureId, bytes calldata _accessory) external override onlyOwner whenPartsNotLocked {
+        _addAccessory(prefectureId, _accessory);
     }
 
     /**
      * @notice Add a Noun head.
      * @dev This function can only be called by the owner when not locked.
      */
-    function addHead(bytes calldata _head) external override onlyOwner whenPartsNotLocked {
-        _addHead(_head);
+    function addHead(uint256 prefectureId, bytes calldata _head) external override onlyOwner whenPartsNotLocked {
+        _addHead(prefectureId, _head);
     }
 
     /**
@@ -329,14 +350,16 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
     /**
      * @notice Add a Noun accessory.
      */
-    function _addAccessory(bytes calldata _accessory) internal {
+    function _addAccessory(uint256 prefectureId, bytes calldata _accessory) internal {
+        prefectureAccessories(prefectureId).push(accessories.length);
         accessories.push(_accessory);
     }
 
     /**
      * @notice Add a Noun head.
      */
-    function _addHead(bytes calldata _head) internal {
+    function _addHead(uint256 prefectureId, bytes calldata _head) internal {
+        prefectureHeads(prefectureId).push(heads.length);
         heads.push(_head);
     }
 
