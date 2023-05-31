@@ -26,8 +26,8 @@ contract LocalNounsToken is ProviderTokenA1 {
     address _committee,
     address _designer,
     address _developper
-  ) ProviderTokenA1(_assetProvider, 'Sushi Nouns', 'Sushi Nouns') {
-    description = 'Sushi Nouns Token.';
+  ) ProviderTokenA1(_assetProvider, 'Local Nouns', 'Local Nouns') {
+    description = 'Local Nouns Token.';
     assetProvider2 = _assetProvider;
     mintPrice = 1e15; // 0.1 
     mintLimit = 5000;
@@ -37,10 +37,10 @@ contract LocalNounsToken is ProviderTokenA1 {
   }
 
   function tokenName(uint256 _tokenId) internal pure override returns (string memory) {
-    return string(abi.encodePacked('Sushi Nouns ', _tokenId.toString()));
+    return string(abi.encodePacked('Local Nouns ', _tokenId.toString()));
   }
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-      require(_tokenId < _nextTokenId(), 'SushiNounsToken.tokenURI: nonexistent token');
+      require(_tokenId < _nextTokenId(), 'LocalNounsToken.tokenURI: nonexistent token');
 
       (string memory svgPart, string memory tag) = assetProvider2.generateSVGPart(_tokenId);
       bytes memory image = bytes(svgPart);
@@ -67,19 +67,19 @@ contract LocalNounsToken is ProviderTokenA1 {
         )
       );
   }
-  function mint(uint256 prefectureId) public payable virtual override returns (uint256 tokenId) {
+  function mint(uint256 prefectureId) public payable virtual returns (uint256 tokenId) {
       require(msg.value >= mintPrice, 'Must send the mint price');
       assetProvider2.mint(prefectureId, _nextTokenId());
       super.mint();
       address payable payableTo = payable(committee);
       payableTo.transfer(address(this).balance);
       
-      if ((_nextTokenId() % 10) == 8) {
-          assetProvider2.mint(_nextTokenId());
-          _safeMint(designer, 1);
-          assetProvider2.mint(_nextTokenId());
-          _safeMint(developper, 1);
-      }
+      // if ((_nextTokenId() % 10) == 8) {
+      //     assetProvider2.mint(prefectureId, _nextTokenId());
+      //     _safeMint(designer, 1);
+      //     assetProvider2.mint(prefectureId_nextTokenId());
+      //     _safeMint(developper, 1);
+      // }
       return _nextTokenId() - 1;
   }
 }

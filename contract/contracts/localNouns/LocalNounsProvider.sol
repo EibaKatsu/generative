@@ -13,12 +13,13 @@ import '@openzeppelin/contracts/interfaces/IERC165.sol';
 
 import { INounsDescriptor } from './interfaces/INounsDescriptor.sol';
 import { INounsSeeder } from './interfaces/INounsSeeder.sol';
+import { ILocalNounsSeeder } from './interfaces/ILocalNounsSeeder.sol';
 import { NFTDescriptor } from '../external/nouns/libs/NFTDescriptor.sol';
 
 contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   using Strings for uint256;
 
-  string constant providerKey = 'SushiNouns';
+  string constant providerKey = 'LocalNouns';
   address public receiver;
 
   uint256 public nextTokenId;
@@ -26,7 +27,7 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   INounsDescriptor public immutable descriptor;
   INounsDescriptor public immutable localDescriptor;
   INounsSeeder public immutable seeder;
-  INounsSeeder public immutable localSead;
+  ILocalNounsSeeder public immutable localSeader;
   
   mapping(uint256 => INounsSeeder.Seed) public seeds;
 
@@ -34,8 +35,7 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
               INounsDescriptor _descriptor,
               INounsDescriptor _localDescriptor,
               INounsSeeder _seeder,
-              INounsSeeder _localSeader
-      
+              ILocalNounsSeeder _localSeader
               ) {
       receiver = owner();
 
@@ -73,7 +73,7 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   function generateSeed(uint256 prefectureId, uint256 _assetId) internal view returns (INounsSeeder.Seed memory mixedSeed) {
       INounsSeeder.Seed memory seed1 = seeder.generateSeed(_assetId, descriptor);
-      INounsSeeder.Seed memory seed2 = localSeader.generateSeed(prefectureId, _assetId, localDescriptor);
+      ILocalNounsSeeder.Seed memory seed2 = localSeader.generateSeed(prefectureId, _assetId, localDescriptor);
 
       mixedSeed = INounsSeeder.Seed({
           background: seed1.background,
