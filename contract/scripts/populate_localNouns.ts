@@ -10,15 +10,15 @@ import { abi as localTokenABI } from "../artifacts/contracts/LocalNounsToken.sol
 
 dotenv.config();
 
-// mumbai
-const localSeederAddress: string = '0x8c3e4aA463e35e46A2E77768Cb1cFEFf852761c3';
-const localNounsDescriptorAddress: string = '0x042a309207cCCf5b8B0dc766aa9d9803ba754A45';
-const localProviderAddress: string = '0xC2AB44f897b1E2a2395c4Be74a318e2834e4c294';
-const localTokenAddress: string = '0xfD18723a29276A09B8A934b9a8A06Ed4B77E35dF';
+const localSeederAddress: string = '0x91cf7ca55343e351dA144AE19aC0E4a3A51292F0';
+const localNounsDescriptorAddress: string = '0xefd772fD83Eaa8A32FC7Cfd191B8097C0e426F60';
+const localProviderAddress: string = '0x775b0a3bE54711cD24681913C62bf3B5ed50049f';
+const localTokenAddress: string = '0x8a224955904fE5aa454FaD3E668df8De7616A113';
 
 async function main() {
   const privateKey = process.env.PRIVATE_KEY !== undefined ? process.env.PRIVATE_KEY : '';
   const wallet = new ethers.Wallet(privateKey, ethers.provider);
+  // const [wallet] = await ethers.getSigners(); // localhost
 
   // ethers.Contract オブジェクトのインスタンスを作成
   const localSeeder = new ethers.Contract(localSeederAddress, localSeederABI, wallet);
@@ -26,37 +26,64 @@ async function main() {
   const localProvider = new ethers.Contract(localProviderAddress, localProviderABI, wallet);
   const localToken = new ethers.Contract(localTokenAddress, localTokenABI, wallet);
 
-  // set Palette
-  console.log(`set Palette start`);  
-  await localNounsDescriptor.addManyColorsToPalette(0, palette);
-  console.log(`set Palette end`);
+  if (false) {
+    // set Palette
+    console.log(`set Palette start`);
+    await localNounsDescriptor.addManyColorsToPalette(0, palette);
+    console.log(`set Palette end`);
 
-  // set Accessories
-  console.log(`set Accessories start`);
-  const accessoryChunk = chunkArrayByPrefectureId(images.accessories);
-  for (const chunk of accessoryChunk) {
-    const prefectureId = chunk[0].filename.split('-')[0];
-    await localNounsDescriptor.addManyAccessories(prefectureId, chunk.map(({ data }) => data));
-    // console.log("chunk:", prefectureId, chunk);
-  }
-  console.log(`set Accessories end`);
+    // set Accessories
+    console.log(`set Accessories start`);
+    const accessoryChunk = chunkArrayByPrefectureId(images.accessories);
+    for (const chunk of accessoryChunk) {
+      const prefectureId = chunk[0].filename.split('-')[0];
+      await localNounsDescriptor.addManyAccessories(prefectureId, chunk.map(({ data }) => data));
+      // console.log("chunk:", prefectureId, chunk);
+    }
+    console.log(`set Accessories end`);
 
-  // set Heads
-  console.log(`set Heads start`);
-  const headChunk = chunkArrayByPrefectureId(images.heads);
-  for (const chunk of headChunk) {
-    const prefectureId = chunk[0].filename.split('-')[0];
-    await localNounsDescriptor.addManyHeads(prefectureId, chunk.map(({ data }) => data));
-    // console.log("chunk:", prefectureId, chunk);
+    // set Heads
+    console.log(`set Heads start`);
+    const headChunk = chunkArrayByPrefectureId(images.heads);
+    for (const chunk of headChunk) {
+      const prefectureId = chunk[0].filename.split('-')[0];
+      await localNounsDescriptor.addManyHeads(prefectureId, chunk.map(({ data }) => data));
+      // console.log("chunk:", prefectureId, chunk);
+    }
+    console.log(`set Heads end`);
+
   }
-  console.log(`set Heads end`);
 
   console.log(`mint start`);
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(16), { value: ethers.utils.parseEther('0.1') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(1), { value: ethers.utils.parseEther('0.1') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(13), { value: ethers.utils.parseEther('0.1') });
+  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(16), { value: ethers.utils.parseEther('0.001') });
+  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(1), { value: ethers.utils.parseEther('0.001') });
+  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(13), { value: ethers.utils.parseEther('0.001') });
   console.log(`mint end`);
+  
+  const seed = {
+    background: 1,
+    body: 0,
+    accessory: 1,
+    head: 1,
+    glasses: 11
+  }
 
+  // console.log(`palletLength`, await localNounsDescriptor.palletLength(0));
+  const ind = 3;
+  console.log(`parts`, await localNounsDescriptor.test(seed,ind));
+  // console.log(`decodeRLEImageTest`, await localNounsDescriptor.decodeRLEImageTest(seed,ind));
+
+  const decodedImage = await localNounsDescriptor.decodeRLEImageTest(seed,ind);
+  console.log("decodedImage2:",decodedImage[2]);
+  // const rects = decodedImage[0].rects;
+  // console.log("rects:",rects);
+  // for(var i=0; i<rects.length; i++){
+  //   console.log("rect[",i,"]:",decodedImage.rects[i]);
+  // }
+
+  console.log(`generateSVGImageTest`, await localNounsDescriptor.generateSVGImageTest(seed,ind));
+
+  // return;
   console.log(`write file start`);
   const index = 0;
   const ret = await localToken.tokenURI(index);

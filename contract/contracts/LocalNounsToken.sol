@@ -29,7 +29,7 @@ contract LocalNounsToken is ProviderTokenA1 {
   ) ProviderTokenA1(_assetProvider, 'Local Nouns', 'Local Nouns') {
     description = 'Local Nouns Token.';
     assetProvider2 = _assetProvider;
-    mintPrice = 1e15; // 0.1 
+    mintPrice = 1e13; // 0.001 
     mintLimit = 5000;
     committee = _committee;
     designer = _designer;

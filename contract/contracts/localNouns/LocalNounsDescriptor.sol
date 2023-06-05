@@ -401,4 +401,188 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
     _parts[3] = descriptor.glasses(seed.glasses);
     return _parts;
   }
+
+  /**
+   * @notice Get all Noun parts for the passed `seed`.
+   */
+  function test(INounsSeeder.Seed memory seed, uint8 ind) public view returns (bytes[] memory) {
+    bytes[] memory _parts = new bytes[](4);
+    _parts[0] = descriptor.bodies(seed.body);
+    _parts[1] = accessories[seed.accessory];
+    _parts[2] = heads[seed.head];
+    _parts[3] = descriptor.glasses(seed.glasses);
+
+    bytes[] memory _parts2 = new bytes[](1);
+    _parts2[0] = _parts[ind];
+    return _parts2;
+  }
+
+  /**
+   * @notice Get all Noun parts for the passed `seed`.
+   */
+  function test2(INounsSeeder.Seed memory seed) public view returns (string memory) {
+    return descriptor.backgrounds(seed.background);
+  }
+
+  /**
+   * @notice Given a seed, construct a base64 encoded SVG image.
+   */
+  function generateSVGImageTest(INounsSeeder.Seed memory seed, uint8 ind) external view returns (string memory) {
+    MultiPartRLEToSVG.SVGParams memory params = MultiPartRLEToSVG.SVGParams({
+      parts: test(seed, ind),
+      background: descriptor.backgrounds(seed.background)
+    });
+
+    return _generateSVGRects(params);
+  }
+
+  /**
+   * @notice Given RLE image parts and color palettes, generate SVG rects.
+   */
+  // prettier-ignore
+  function _generateSVGRects(MultiPartRLEToSVG.SVGParams memory params)
+        private
+        view
+        returns (string memory svg)
+    {
+        string[33] memory lookup = [
+            '0', '10', '20', '30', '40', '50', '60', '70', 
+            '80', '90', '100', '110', '120', '130', '140', '150', 
+            '160', '170', '180', '190', '200', '210', '220', '230', 
+            '240', '250', '260', '270', '280', '290', '300', '310',
+            '320' 
+        ];
+        string memory rects;
+        for (uint8 p = 0; p < params.parts.length; p++) {
+            DecodedImage memory image = _decodeRLEImage(params.parts[p]);
+            string[] storage palette = palettes[image.paletteIndex];
+            uint256 currentX = image.bounds.left;
+            uint256 currentY = image.bounds.top;
+            uint256 cursor;
+            string[16] memory buffer;
+
+            string memory part;
+            for (uint256 i = 0; i < image.rects.length; i++) {
+                Rect memory rect = image.rects[i];
+                if (rect.colorIndex != 0) {
+                    buffer[cursor] = lookup[rect.length];          // width
+                    buffer[cursor + 1] = lookup[currentX];         // x
+                    buffer[cursor + 2] = lookup[currentY];         // y
+                    buffer[cursor + 3] = palette[rect.colorIndex]; // color
+                    // buffer[cursor + 3] = palette[rect.colorIndex]; // color
+
+                    cursor += 4;
+
+                    if (cursor >= 16) {
+                        part = string(abi.encodePacked(part, _getChunk(cursor, buffer)));
+                        cursor = 0;
+                    }
+                }
+
+                currentX += rect.length;
+                if (currentX == image.bounds.right) {
+                    currentX = image.bounds.left;
+                    currentY++;
+                }
+            }
+
+            if (cursor != 0) {
+                part = string(abi.encodePacked(part, _getChunk(cursor, buffer)));
+            }
+            rects = string(abi.encodePacked(rects, part));
+        }
+        return rects;
+    }
+
+  /**
+   * @notice Return a string that consists of all rects in the provided `buffer`.
+   */
+  // prettier-ignore
+  function _getChunk(uint256 cursor, string[16] memory buffer) private pure returns (string memory) {
+        string memory chunk;
+        for (uint256 i = 0; i < cursor; i += 4) {
+            chunk = string(
+                abi.encodePacked(
+                    chunk,
+                    '<rect width="', buffer[i], '" height="10" x="', buffer[i + 1], '" y="', buffer[i + 2], '" fill="#', buffer[i + 3], '" />'
+                )
+            );
+        }
+        return chunk;
+    }
+
+  struct DecodedImage {
+    uint8 paletteIndex;
+    ContentBounds bounds;
+    Rect[] rects;
+  }
+
+  struct ContentBounds {
+    uint8 top;
+    uint8 right;
+    uint8 bottom;
+    uint8 left;
+  }
+
+  struct Rect {
+    uint8 length;
+    uint8 colorIndex;
+  }
+
+  function palletLength(uint8 _paletteIndex) public view returns (uint256) {
+    return palettes[_paletteIndex].length;
+  }
+
+  /**
+   * @notice Decode a single RLE compressed image into a `DecodedImage`.
+   */
+  function decodeRLEImageTest(
+    INounsSeeder.Seed memory seed,
+    uint8 ind
+  ) public view returns (DecodedImage memory decodedImage) {
+    bytes[] memory parts = new bytes[](4);
+    parts[0] = descriptor.bodies(seed.body);
+    parts[1] = accessories[seed.accessory];
+    parts[2] = heads[seed.head];
+    parts[3] = descriptor.glasses(seed.glasses);
+
+    bytes memory image = parts[ind];
+
+    uint8 paletteIndex = uint8(image[0]);
+    ContentBounds memory bounds = ContentBounds({
+      top: uint8(image[1]),
+      right: uint8(image[2]),
+      bottom: uint8(image[3]),
+      left: uint8(image[4])
+    });
+
+    uint256 cursor;
+    Rect[] memory rects = new Rect[]((image.length - 5) / 2);
+    for (uint256 i = 5; i < image.length; i += 2) {
+      rects[cursor] = Rect({ length: uint8(image[i]), colorIndex: uint8(image[i + 1]) });
+      cursor++;
+    }
+    decodedImage = DecodedImage({ paletteIndex: paletteIndex, bounds: bounds, rects: rects });
+  }
+
+  /**
+   * @notice Decode a single RLE compressed image into a `DecodedImage`.
+   */
+  function _decodeRLEImage(bytes memory image) private pure returns (DecodedImage memory) {
+    uint8 paletteIndex = uint8(image[0]);
+    ContentBounds memory bounds = ContentBounds({
+      top: uint8(image[1]),
+      right: uint8(image[2]),
+      bottom: uint8(image[3]),
+      left: uint8(image[4])
+    });
+
+    uint256 cursor;
+    Rect[] memory rects = new Rect[]((image.length - 5) / 2);
+    for (uint256 i = 5; i < image.length; i += 2) {
+      rects[cursor] = Rect({ length: uint8(image[i]), colorIndex: uint8(image[i + 1]) });
+      cursor++;
+    }
+    return DecodedImage({ paletteIndex: paletteIndex, bounds: bounds, rects: rects });
+  }
 }
