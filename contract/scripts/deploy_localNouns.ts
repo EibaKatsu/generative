@@ -2,13 +2,13 @@ import { ethers, network } from 'hardhat';
 import { exec } from 'child_process';
 import addresses from '@nouns/sdk/dist/contract/addresses.json';
 
-const nounsDescriptor: string = network.name == 'goerli' ? addresses[5].nounsDescriptor : addresses[1].nounsDescriptor;
-const nounsSeeder: string = network.name == 'goerli' ? addresses[5].nounsSeeder : addresses[1].nounsSeeder;
-const nftDescriptor: string = network.name == 'goerli' ? addresses[5].nftDescriptor : addresses[1].nftDescriptor;
+// const nounsDescriptor: string = network.name == 'goerli' ? addresses[5].nounsDescriptor : addresses[1].nounsDescriptor;
+// const nounsSeeder: string = network.name == 'goerli' ? addresses[5].nounsSeeder : addresses[1].nounsSeeder;
+// const nftDescriptor: string = network.name == 'goerli' ? addresses[5].nftDescriptor : addresses[1].nftDescriptor;
 
-// const nounsDescriptor: string = '0xFE8C02d95A5058F54Ebc4242A43D3E9A6290102d'; // mumbai
-// const nounsSeeder: string = '0x5f5C984E0BAf150D5a74ae21f4777Fd1947DE8c9'; // mumbai
-// const nftDescriptor: string = '0x1881c541E9d83880008B3720de0E537C34052ecf'; // mumbai
+const nounsDescriptor: string = '0x6F16d41e6C09110BB43ae95F5718d8f9B47b512D'; // mumbai
+const nounsSeeder: string = '0x5f5C984E0BAf150D5a74ae21f4777Fd1947DE8c9'; // mumbai
+const nftDescriptor: string = '0xbF54753b77daF77a601675a6eB6D59fB1495CDDE'; // mumbai
 
 // const nounsDescriptor: string = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'; // localhost
 // const nounsSeeder: string = '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707'; // localhost

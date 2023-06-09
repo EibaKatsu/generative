@@ -59,7 +59,7 @@ contract LocalNounsToken is ProviderTokenA1 {
                 '","attributes":[',
                 generateTraits(_tokenId),
                 '],"image":"data:image/svg+xml;base64,',
-                Base64.encode(image),
+                image,
                 '"}'
               )
             )
