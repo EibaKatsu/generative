@@ -54,66 +54,14 @@ async function main() {
 
   }
 
-  // for (var i:number = 1; i <= 47; i++) {
-  //   console.log(i,":",ethers.BigNumber.from(i));
-  //   await localToken.functions['mint(uint256)'](ethers.BigNumber.from(String(i)), { value: ethers.utils.parseEther('0.001') });
-  //   console.log(`mint [`, i, `]`);
-  // }
-
-  // console.log(`mint start`);
-  // await localToken.functions['mint(uint256)'](ethers.BigNumber.from(16), { value: ethers.utils.parseEther('0.001') });
-  // await localToken.functions['mint(uint256)'](ethers.BigNumber.from(1), { value: ethers.utils.parseEther('0.001') });
-  // await localToken.functions['mint(uint256)'](ethers.BigNumber.from(13), { value: ethers.utils.parseEther('0.001') });
-  // console.log(`mint end`);
-
-
-  // await localToken.functions['mint(uint256)'](ethers.BigNumber.from(1), { value: ethers.utils.parseEther('0.001') });
-  // await localToken.functions['mint(uint256)'](ethers.BigNumber.from(2), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(3), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(4), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(5), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(6), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(7), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(8), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(9), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(10), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(11), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(12), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(13), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(14), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(15), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(16), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(17), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(18), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(19), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(20), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(21), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(22), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(23), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(24), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(25), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(26), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(27), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(28), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(29), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(30), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(31), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(32), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(33), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(34), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(35), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(36), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(37), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(38), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(39), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(40), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(41), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(42), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(43), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(44), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(45), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(46), { value: ethers.utils.parseEther('0.001') });
-  await localToken.functions['mint(uint256)'](ethers.BigNumber.from(47), { value: ethers.utils.parseEther('0.001') });
+  for (var i: number = 1; i <= 47; i++) {
+    try {
+      await localToken.functions['mint(uint256)'](ethers.BigNumber.from(String(i)), { value: ethers.utils.parseEther('0.001') });
+      console.log(`mint [`, i, `]`);
+    } catch (error) {
+      console.error(error);
+    };
+  }
 
   const seed = {
     background: 1,

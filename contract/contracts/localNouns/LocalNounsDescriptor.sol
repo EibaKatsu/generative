@@ -403,40 +403,6 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
   }
 
   /**
-   * @notice Get all Noun parts for the passed `seed`.
-   */
-  function test(INounsSeeder.Seed memory seed, uint8 ind) public view returns (bytes[] memory) {
-    bytes[] memory _parts = new bytes[](4);
-    _parts[0] = descriptor.bodies(seed.body);
-    _parts[1] = accessories[seed.accessory];
-    _parts[2] = heads[seed.head];
-    _parts[3] = descriptor.glasses(seed.glasses);
-
-    bytes[] memory _parts2 = new bytes[](1);
-    _parts2[0] = _parts[ind];
-    return _parts2;
-  }
-
-  /**
-   * @notice Get all Noun parts for the passed `seed`.
-   */
-  function test2(INounsSeeder.Seed memory seed) public view returns (string memory) {
-    return descriptor.backgrounds(seed.background);
-  }
-
-  /**
-   * @notice Given a seed, construct a base64 encoded SVG image.
-   */
-  function generateSVGImageTest(INounsSeeder.Seed memory seed, uint8 ind) external view returns (string memory) {
-    MultiPartRLEToSVG.SVGParams memory params = MultiPartRLEToSVG.SVGParams({
-      parts: test(seed, ind),
-      background: descriptor.backgrounds(seed.background)
-    });
-
-    return _generateSVGRects(params);
-  }
-
-  /**
    * @notice Given RLE image parts and color palettes, generate SVG rects.
    */
   // prettier-ignore
@@ -531,38 +497,6 @@ contract LocalNounsDescriptor is INounsDescriptor, Ownable {
 
   function palletLength(uint8 _paletteIndex) public view returns (uint256) {
     return palettes[_paletteIndex].length;
-  }
-
-  /**
-   * @notice Decode a single RLE compressed image into a `DecodedImage`.
-   */
-  function decodeRLEImageTest(
-    INounsSeeder.Seed memory seed,
-    uint8 ind
-  ) public view returns (DecodedImage memory decodedImage) {
-    bytes[] memory parts = new bytes[](4);
-    parts[0] = descriptor.bodies(seed.body);
-    parts[1] = accessories[seed.accessory];
-    parts[2] = heads[seed.head];
-    parts[3] = descriptor.glasses(seed.glasses);
-
-    bytes memory image = parts[ind];
-
-    uint8 paletteIndex = uint8(image[0]);
-    ContentBounds memory bounds = ContentBounds({
-      top: uint8(image[1]),
-      right: uint8(image[2]),
-      bottom: uint8(image[3]),
-      left: uint8(image[4])
-    });
-
-    uint256 cursor;
-    Rect[] memory rects = new Rect[]((image.length - 5) / 2);
-    for (uint256 i = 5; i < image.length; i += 2) {
-      rects[cursor] = Rect({ length: uint8(image[i]), colorIndex: uint8(image[i + 1]) });
-      cursor++;
-    }
-    decodedImage = DecodedImage({ paletteIndex: paletteIndex, bounds: bounds, rects: rects });
   }
 
   /**
