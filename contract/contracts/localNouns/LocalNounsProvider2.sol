@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 /*
- * Created by Isamu Arimoto (@isamua)
+ * Created by @eiba8884
  */
 
 pragma solidity ^0.8.6;
@@ -10,14 +10,14 @@ import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IAssetProviderExMint.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/interfaces/IERC165.sol';
+import 'randomizer.sol/Randomizer.sol';
 
 import { INounsDescriptor } from './interfaces/INounsDescriptor.sol';
 import { INounsSeeder } from './interfaces/INounsSeeder.sol';
-import { ILocalNounsSeeder } from './interfaces/ILocalNounsSeeder.sol';
-import { NFTDescriptor } from '../external/nouns/libs/NFTDescriptor.sol';
 
-contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
+contract LocalNounsProvider2 is IAssetProviderExMint, IERC165, Ownable {
   using Strings for uint256;
+  using Randomizer for Randomizer.Seed;
 
   string constant providerKey = 'LocalNouns';
   address public receiver;
@@ -26,10 +26,7 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   INounsDescriptor public immutable descriptor;
   INounsDescriptor public immutable localDescriptor;
-  INounsSeeder public immutable seeder;
-  ILocalNounsSeeder public immutable localSeeder;
 
-  mapping(uint256 => INounsSeeder.Seed) public seeds;
   mapping(uint256 => uint256) public tokenIdToPrefectureId;
   mapping(uint256 => string) public prefectureName;
   mapping(uint256 => uint256) public mintNumberPerPrefecture; // 都道府県ごとのミント数
@@ -41,18 +38,11 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   uint256 accumulationRatioRankTotal;
   mapping(uint256 => uint256[]) public prefectureRatio;
 
-  constructor(
-    INounsDescriptor _descriptor,
-    INounsDescriptor _localDescriptor,
-    INounsSeeder _seeder,
-    ILocalNounsSeeder _localSeeder
-  ) {
+  constructor(INounsDescriptor _descriptor, INounsDescriptor _localDescriptor) {
     receiver = owner();
 
     descriptor = _descriptor;
     localDescriptor = _localDescriptor;
-    seeder = _seeder;
-    localSeeder = _localSeeder;
 
     prefectureName[1] = 'Hokkaido';
     prefectureName[2] = 'Aomori';
@@ -144,35 +134,59 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     uint256 prefectureId,
     uint256 _assetId
   ) internal view returns (INounsSeeder.Seed memory mixedSeed) {
-    INounsSeeder.Seed memory seed1 = seeder.generateSeed(_assetId, descriptor);
-    ILocalNounsSeeder.Seed memory seed2 = localSeeder.generateSeed(prefectureId, _assetId, localDescriptor);
+    uint256 pseudorandomness;
+    Randomizer.Seed memory seed = Randomizer.Seed(_assetId, 0);
+
+    // LocalNounsのヘッドを決定
+    uint256 headCount = localDescriptor.headCountInPrefecture(prefectureId);
+    (seed, pseudorandomness) = seed.random(headCount);
+    uint256 headPartId = localDescriptor.headInPrefecture(prefectureId, pseudorandomness);
+
+    // LocalNounsのアクセサリを決定
+    uint256 accessoryCount = localDescriptor.accessoryCountInPrefecture(prefectureId % 100); // 1,2桁目：都道府県番号、3桁目以降：バージョン番号
+    (seed, pseudorandomness) = seed.random(accessoryCount);
+    uint256 accesoryPartId = localDescriptor.accessoryInPrefecture(prefectureId % 100, pseudorandomness);
+
+    // Nounsのバックグラウンドを決定
+    uint256 backgroundCount = descriptor.backgroundCount();
+    (seed, pseudorandomness) = seed.random(backgroundCount);
+    uint256 backgroundPartId = pseudorandomness;
+
+    // Nounsのボディを決定
+    uint256 bodyCount = descriptor.bodyCount();
+    (seed, pseudorandomness) = seed.random(bodyCount);
+    uint256 bodyPartId = pseudorandomness;
+
+    // Nounsのグラスを決定
+    uint256 glassesCount = descriptor.glassesCount();
+    (seed, pseudorandomness) = seed.random(glassesCount);
+    uint256 glassesPartId = pseudorandomness;
 
     mixedSeed = INounsSeeder.Seed({
-      background: seed1.background,
-      body: seed1.body,
-      accessory: seed2.accessory,
-      head: seed2.head,
-      glasses: seed1.glasses
+      background: uint48(backgroundPartId),
+      body: uint48(bodyPartId),
+      accessory: uint48(accesoryPartId),
+      head: uint48(headPartId),
+      glasses: uint48(glassesPartId)
     });
   }
 
   function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
-    // INounsSeeder.Seed memory seed = generateSeed(_assetId);
-    INounsSeeder.Seed memory seed = seeds[_assetId];
-    svgPart = localDescriptor.generateSVGImage(seed);
+    INounsSeeder.Seed memory seed = generateSeed(tokenIdToPrefectureId[_assetId], _assetId);
 
-    // generateSVGImage
+    svgPart = localDescriptor.generateSVGImage(seed);
     tag = string('');
-    // svgPart = string("");
   }
 
   function generateTraits(uint256 _assetId) external view override returns (string memory traits) {
-    uint256 headPartsId = seeds[_assetId].head;
-    uint256 accessoryPartsId = seeds[_assetId].accessory;
+    INounsSeeder.Seed memory seed = generateSeed(tokenIdToPrefectureId[_assetId], _assetId);
+
+    uint256 headPartsId = seed.head;
+    uint256 accessoryPartsId = seed.accessory;
     traits = string(
       abi.encodePacked(
         '{"trait_type": "prefecture" , "value":"',
-        prefectureName[tokenIdToPrefectureId[_assetId]],
+        prefectureName[tokenIdToPrefectureId[_assetId] % 100],
         '"}',
         ',{"trait_type": "head" , "value":"',
         localDescriptor.headName(headPartsId),
@@ -186,7 +200,6 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   // テスト用にpublic
   function determinePrefectureId(uint256 _assetId) public view returns (uint256) {
-
     uint256 rank = _assetId % accumulationRatioRankTotal;
     for (uint256 i = 0; i < accumulationRatioRank.length; i++) {
       if (rank < accumulationRatioRank[i]) {
@@ -206,15 +219,14 @@ contract LocalNounsProvider is IAssetProviderExMint, IERC165, Ownable {
       prefectureId = _prefectureId;
     }
 
-    seeds[_assetId] = generateSeed(prefectureId, _assetId);
-    tokenIdToPrefectureId[_assetId] = prefectureId % 100;
+    tokenIdToPrefectureId[_assetId] = prefectureId;
     mintNumberPerPrefecture[prefectureId % 100]++;
     nextTokenId++;
 
     return _assetId;
   }
 
-  function getPrefectureId(uint256 _tokenId) external override returns (uint256) {
+  function getPrefectureId(uint256 _tokenId) external view override returns (uint256) {
     return tokenIdToPrefectureId[_tokenId];
   }
 }

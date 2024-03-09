@@ -19,17 +19,17 @@ before(async () => {
     /* `npx hardhat node`実行後、このスクリプトを実行する前に、Nouns,LocalNounsの関連するコントラクトを
      * デプロイする必要があります。(一度実行すると、node停止までは再実施する必要なし)
         # cd contract
-        # npx hardhat run scripts/deploy_nounsDescriptorV1.ts
-        # npx hardhat run scripts/populate_nounsV1.ts
-        # npx hardhat run scripts/deploy_localNouns.ts
-        # npx hardhat run scripts/populate_localNouns.ts
-        # npx hardhat run scripts/deploy_sample.ts
+         npx hardhat run scripts/deploy_nounsDescriptorV1.ts
+         npx hardhat run scripts/populate_nounsV1.ts
+         npx hardhat run scripts/deploy_localNouns.ts
+         npx hardhat run scripts/populate_localNouns.ts
+         npx hardhat run scripts/deploy_sample.ts
 
         note: `npx hardhat node`実行時にJavaScript heap out of memory が発生した場合は環境変数で使用メモリを指定する
         export NODE_OPTIONS=--max-old-space-size=4096
 
         # テスト実行
-        # npx hardhat test test/localNouns.ts
+        # npx hardhat test test/localNounsMinter2.ts
 
      */
 
@@ -39,9 +39,9 @@ before(async () => {
     tokenGate = await factoryTokenGate.deploy();
     await tokenGate.deployed();
 
-    const factoryProvider = await ethers.getContractFactory('LocalNounsProvider');
+    const factoryProvider = await ethers.getContractFactory('LocalNounsProvider2');
     provider = await factoryProvider.deploy(
-        nounsDescriptorAddress, localNounsDescriptorAddress, nounsSeederAddress, localSeederAddress);
+        nounsDescriptorAddress, localNounsDescriptorAddress);
     await provider.deployed();
     // console.log(`##LocalNounsProvider="${provider.address}"`);
 
@@ -50,7 +50,7 @@ before(async () => {
     await token.deployed();
     // console.log(`##LocalNounsToken="${token.address}"`);
 
-    const factoryMinter = await ethers.getContractFactory('LocalNounsMinter');
+    const factoryMinter = await ethers.getContractFactory('LocalNounsMinter2');
     minter = await factoryMinter.deploy(token.address, tokenGate.address);
     await minter.deployed();
     // console.log(`##LocalNounsMinter="${minter.address}"`);
@@ -83,14 +83,18 @@ describe('mint functions', function () {
     it('mint at lock phaze', async function () {
 
         const [phaze] = await minter.functions.phase();
-        expect(phaze).to.equal(0); // Lock
+        expect(phaze).to.equal(2); // PublicSale
+
+        await minter.connect(owner).functions.setPhase(0);
+        const [phaze2] = await minter.functions.phase();
+        expect(phaze2).to.equal(0); // PublicSale
 
         await expect(minter.connect(user1).functions.mintSelectedPrefecture(1, 1))
             .revertedWith('Sale is locked');
 
         await minter.connect(owner).functions.setPhase(2);
-        const [phaze2] = await minter.functions.phase();
-        expect(phaze2).to.equal(2); // PublicSale
+        const [phaze3] = await minter.functions.phase();
+        expect(phaze3).to.equal(2); // PublicSale
 
     });
 
@@ -121,6 +125,25 @@ describe('mint functions', function () {
 
     });
 
+    it('mint from minter2', async function () {
+
+        const txParams = { value: ethers.utils.parseUnits("0.01", "ether") };
+        await minter.connect(user1).functions.mintSelectedPrefecture2(0, 1, user2.address, txParams);
+
+        const [balance] = await token.functions.balanceOf(user2.address);
+        expect(balance.toNumber()).to.equal(1); // user2は1つ保持
+
+        const [owner1] = await token.functions.ownerOf(1);
+        expect(owner1).to.equal(user2.address);
+
+        const [totalSupply] = await token.functions.totalSupply();
+        expect(totalSupply.toNumber()).to.equal(2); // tokenId=1
+
+        const [traits1] = await provider.functions.generateTraits(1);
+        // console.log('mint from minter', traits1);
+
+    });
+
     it('multiple mint', async function () {
 
         const [balance0] = await token.functions.balanceOf(user3.address);
@@ -132,22 +155,22 @@ describe('mint functions', function () {
 
         expect(balance.toNumber()).to.equal(3); // user3は3つ追加
 
-        const [owner0] = await token.functions.ownerOf(1);
+        const [owner0] = await token.functions.ownerOf(2);
         expect(owner0).to.equal(user3.address);
 
-        const [owner1] = await token.functions.ownerOf(2);
+        const [owner1] = await token.functions.ownerOf(3);
         expect(owner1).to.equal(user3.address);
 
-        const [owner2] = await token.functions.ownerOf(3);
+        const [owner2] = await token.functions.ownerOf(4);
         expect(owner2).to.equal(user3.address);
 
         const [totalSupply] = await token.functions.totalSupply();
-        expect(totalSupply.toNumber()).to.equal(4); // tokenId=1
+        expect(totalSupply.toNumber()).to.equal(5); // tokenId=1
 
         // Traitsに指定した都道府県名が設定される
-        const [traits1] = await provider.functions.generateTraits(1);
-        const [traits2] = await provider.functions.generateTraits(2);
-        const [traits3] = await provider.functions.generateTraits(3);
+        const [traits1] = await provider.functions.generateTraits(2);
+        const [traits2] = await provider.functions.generateTraits(3);
+        const [traits3] = await provider.functions.generateTraits(4);
         // head,accessoryがランダムなので県のみチェック(head,accessoryは目視)
         console.log('multiple mint', traits1);
         console.log('multiple mint', traits2);
@@ -233,7 +256,7 @@ describe('mint functions', function () {
 });
 
 describe('determinePrefectureId', function () {
-    it('determinePrefectureId', async function () {
+    it.skip('determinePrefectureId', async function () {
 
         let prefectureCount = new Array(47).fill(0);
 

@@ -12,7 +12,19 @@ const getUrl = () => {
 };
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.17",
+  solidity: {
+    version: "0.8.17",
+    settings: {
+      optimizer: {
+        enabled: true,
+        details: {
+          yulDetails: {
+            optimizerSteps: "u",
+          },
+        },
+      },
+    }
+  },
   defaultNetwork: "localhost",
   networks: {
     polygon: {
@@ -25,6 +37,7 @@ const config: HardhatUserConfig = {
     mumbai: {
       // url: "https://rpc-mumbai.maticvigil.com",
       url: "https://polygon-mumbai.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY,
+      gasMultiplier: 1.3,
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -41,8 +54,8 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     mainnet: {
-      url: "https://eth-mainnet.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY,
-      gasMultiplier: 1.2,
+      url: "https://eth-mainnet.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY,
+      gasMultiplier: 1.1,
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     }

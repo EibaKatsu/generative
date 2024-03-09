@@ -21,19 +21,21 @@ import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/ILocalNounsToken.sol';
 import '../interfaces/ITokenGate.sol';
 
-contract LocalNounsMinter is Ownable {
+contract LocalNounsMinter2 is Ownable {
   // Fires when the purchase executed
   event MintSelectedPrefecture(uint256 prefectureId, uint256 amount, address minter);
 
   ILocalNounsToken public token;
   ITokenGate public immutable tokenGate;
+  
+  address[] public royaltyAddresses; // ロイヤリティ送信先ウォレット
+  mapping(address => uint256) public royaltyRatio; // ロイヤリティ送信先ウォレットごとの割合
+  uint256 royaltyRatioTotal; // royaltyRatioの合計(割戻用)
 
   uint256 public mintPriceForSpecified = 0.03 ether;
   uint256 public mintPriceForNotSpecified = 0.01 ether;
 
   uint256 public mintMax = 1500;
-
-  mapping(address => uint256) public preferentialPurchacedCount;
 
   enum SalePhase {
     Locked,
@@ -41,7 +43,7 @@ contract LocalNounsMinter is Ownable {
     PublicSale
   }
 
-  SalePhase public phase = SalePhase.Locked; // セールフェーズ
+  SalePhase public phase = SalePhase.PublicSale; // セールフェーズ
 
   address public administratorsAddress; // 運営ウォレット
 
@@ -49,6 +51,11 @@ contract LocalNounsMinter is Ownable {
     token = _token;
     administratorsAddress = msg.sender;
     tokenGate = _tokenGate;
+
+    // ロイヤリティ送信先(コンストラクタではデプロイアドレス100%)
+    royaltyAddresses = [msg.sender];
+    royaltyRatio[msg.sender] = 1;
+    royaltyRatioTotal = 1;
   }
 
   function setMintMax(uint256 _mintMax) external onlyOwner {
@@ -76,6 +83,14 @@ contract LocalNounsMinter is Ownable {
   }
 
   function mintSelectedPrefecture(uint256 _prefectureId, uint256 _amount) public payable returns (uint256 tokenId) {
+    return mintSelectedPrefecture2(_prefectureId, _amount, msg.sender);
+  }
+
+  function mintSelectedPrefecture2(
+    uint256 _prefectureId,
+    uint256 _amount,
+    address _mintTo
+  ) public payable returns (uint256 tokenId) {
     if (phase == SalePhase.Locked) {
       revert('Sale is locked');
     } else if (phase == SalePhase.PreSale) {
@@ -92,14 +107,39 @@ contract LocalNounsMinter is Ownable {
     }
     require(msg.value >= mintPrice * _amount, 'Must send the mint price');
 
-    tokenId = token.mintSelectedPrefecture(msg.sender, _prefectureId, _amount);
+    tokenId = token.mintSelectedPrefecture(_mintTo, _prefectureId, _amount);
 
-    emit MintSelectedPrefecture(_prefectureId, _amount, msg.sender);
+    _sendRoyalty(msg.value);
+
+    emit MintSelectedPrefecture(_prefectureId, _amount, _mintTo);
   }
 
   function withdraw() external payable onlyOwner {
-    require(administratorsAddress != address(0), "administratorsAddress shouldn't be 0");
-    (bool sent, ) = payable(administratorsAddress).call{ value: address(this).balance }('');
-    require(sent, 'failed to move fund to administratorsAddress contract');
+    _sendRoyalty(address(this).balance);
   }
+
+  // send royalties to admin and developper
+  function _sendRoyalty(uint _royalty) internal {
+    for (uint256 i = 0; i < royaltyAddresses.length; i++) {
+      _trySendRoyalty(royaltyAddresses[i], (_royalty * royaltyRatio[royaltyAddresses[i]]) / royaltyRatioTotal);
+    }
+  }
+
+  function _trySendRoyalty(address to, uint amount) internal {
+    (bool sent, ) = payable(to).call{ value: amount }('');
+    require(sent, 'Failed to send');
+  }
+
+  function setRoyaltyAddresses(address[] memory _addr, uint256[] memory ratio) external onlyOwner {
+    // 引数の整合性チェック
+    require(_addr.length == ratio.length, 'Invalid Arrays length');
+    royaltyAddresses = _addr;
+    royaltyRatioTotal = 0;
+
+    for (uint256 i = 0; i < _addr.length; i++) {
+      royaltyRatio[_addr[i]] = ratio[i];
+      royaltyRatioTotal += ratio[i];
+    }
+  }
+
 }

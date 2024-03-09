@@ -1,13 +1,10 @@
-/**
- * HEADの追加用
- */
 import * as dotenv from "dotenv";
 import { ethers, network } from 'hardhat';
 import { addresses } from '../../src/utils/addresses';
 
 const nounsDescriptor = addresses.nounsDescriptor[network.name];
 
-import { images, palette } from "../test/image-local-data2";
+import { images, palette, bgcolors } from "../test/image-local-data";
 import { abi as localSeederABI } from "../artifacts/contracts/localNouns/LocalNounsSeeder.sol/LocalNounsSeeder";
 import { abi as localNounsDescriptorABI } from "../artifacts/contracts/localNouns/LocalNounsDescriptor.sol/LocalNounsDescriptor";
 import { abi as localProviderABI } from "../artifacts/contracts/localNouns/LocalNounsProvider.sol/LocalNounsProvider";
@@ -36,21 +33,46 @@ async function main() {
   const localToken = new ethers.Contract(localTokenAddress, localTokenABI, wallet);
   const localMinter = new ethers.Contract(localMinterAddress, localMinterABI, wallet);
 
-  let tx;
+
+  console.log(`localNounsDescriptor:`, localNounsDescriptor.address);
+
   if (true) {
+
+    // console.log(`set backgrounds start`);
+    // await localNounsDescriptor.addManyBackgrounds(bgcolors);
+    // console.log(`set backgrounds end`);
+
+
+    // set Palette
+    // console.log(`set Palette start`);
+    // await localNounsDescriptor.addManyColorsToPalette(0, palette);
+    // console.log(`set Palette end`);
+
+    // set Accessories
+    // console.log(`set Accessories start`);
+    // const accessoryChunk = chunkArrayByPrefectureId(images.accessories);
+    // for (const chunk of accessoryChunk) {
+    //   const prefectureId = chunk[0].prefectureId;
+    //   if (Number(prefectureId) == 3 || Number(prefectureId) == 2) {
+    //     await localNounsDescriptor.addManyAccessories(prefectureId, chunk.map(({ data }) => data), chunk.map(({ filename }) => filename));
+    //     console.log("chunk:", prefectureId, chunk);
+    //   }
+    // }
+    // console.log(`set Accessories end`);
+
     // set Heads
     console.log(`set Heads start`);
     const headChunk = chunkArrayByPrefectureId(images.heads);
     for (const chunk of headChunk) {
       const prefectureId = chunk[0].prefectureId;
-      tx = await localNounsDescriptor.addManyHeads(prefectureId, chunk.map(({ data }) => data), chunk.map(({ filename }) => filename));
-      // console.log("chunk:", prefectureId, chunk);
-      console.log(prefectureId,tx.hash);
+      if (Number(prefectureId) == 3) {
+        await localNounsDescriptor.addManyHeads(prefectureId, chunk.map(({ data }) => data), chunk.map(({ filename }) => filename));
+        console.log("chunk:", prefectureId, chunk);
+      }
     }
     console.log(`set Heads end`);
 
   }
-
 }
 
 main().catch(error => {
@@ -78,9 +100,16 @@ function chunkArrayByPrefectureId(imagedata: ImageData[]): ImageData[][] {
     let id = filename[0];
     imagedata[i].prefectureId = id;
 
-    // filenameの抽出 ex)"132-head-32-shimane-heads" -> "shimane-map"
-    imagedata[i].filename = filename[3]+'-map';
-    console.log("imagedata[i].filename", imagedata[i].filename);
+    // filenameの抽出 ex)"35-yamaguchi-white -snake-accessories" -> "white-snake"
+    let name = '';
+    for (var j = 2; j < filename.length - 1; j++) {
+      if (name.length > 0) {
+        name += '-';
+      }
+      name += filename[j].trim();
+    }
+    imagedata[i].filename = name;
+    // console.log("imagedata[i].filename", imagedata[i].filename);
     if (!map.has(id)) {
       map.set(id, []);
     }

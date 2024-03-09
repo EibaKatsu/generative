@@ -1,4 +1,4 @@
 export const addresses = {
-  providerAddress:"0x7Cf4be31f546c04787886358b9486ca3d62B9acf",
-  sampleToken:"0x33E45b187da34826aBCEDA1039231Be46f1b05Af"
+  providerAddress:"0x70bDA08DBe07363968e9EE53d899dFE48560605B",
+  sampleToken:"0x26B862f640357268Bd2d9E95bc81553a2Aa81D7E"
 }
