@@ -61,17 +61,11 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   // Noun Glasses (Custom RLE)
   bytes[] public override glasses;
 
-  // prefectureId => parts index of heads
-  mapping(uint256 => uint256[]) public prefectureHeads;
-
-  // prefectureId => parts index of accessories
-  mapping(uint256 => uint256[]) public prefectureAccessories;
+  // eventId => parts index of heads
+  mapping(uint256 => uint256[]) public eventHeads;
 
   // parts index => parts name of heads
-  mapping(uint256 => string) public headsName;
-
-  // parts index => parts name of accessories
-  mapping(uint256 => string) public AccessoriesName;
+  mapping(uint256 => string) public eventName;
 
   constructor(INounsDescriptor _descriptor) {
     descriptor = _descriptor;
@@ -108,27 +102,6 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   }
 
   /**
-   * @notice Get the number of available Noun `accessories` in the prefecture.
-   */
-  function accessoryCountInPrefecture(uint256 prefectureId) external view override returns (uint256) {
-    return prefectureAccessories[prefectureId].length;
-  }
-
-  /**
-   * @notice Get the number of available Noun `accessories` in the prefecture.
-   */
-  function accessoryInPrefecture(uint256 prefectureId, uint256 seqNo) external view override returns (uint256) {
-    return prefectureAccessories[prefectureId][seqNo];
-  }
-
-  /**
-   * @notice Get the name of accessories.
-   */
-  function accessoryName(uint256 _partsId) external view override returns (string memory) {
-    return AccessoriesName[_partsId];
-  }
-
-  /**
    * @notice Get the number of available Noun `heads`.
    */
   function headCount() external view override returns (uint256) {
@@ -136,17 +109,17 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   }
 
   /**
-   * @notice Get the number of available Noun `heads` in the prefecture.
+   * @notice Get the number of available Noun `heads` in the event.
    */
-  function headCountInPrefecture(uint256 prefectureId) external view override returns (uint256) {
-    return prefectureHeads[prefectureId].length;
+  function headCountInEvent(uint256 eventId) external view override returns (uint256) {
+    return eventHeads[eventId].length;
   }
 
   /**
-   * @notice Get the number of available Noun `heads` in the prefecture.
+   * @notice Get the number of available Noun `heads` in the event.
    */
-  function headInPrefecture(uint256 prefectureId, uint256 seqNo) external view override returns (uint256) {
-    return prefectureHeads[prefectureId][seqNo];
+  function headInEvent(uint256 eventId, uint256 seqNo) external view override returns (uint256) {
+    return eventHeads[eventId][seqNo];
   }
 
   /**
@@ -200,12 +173,11 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @dev This function can only be called by the owner when not locked.
    */
   function addManyAccessories(
-    uint256 prefectureId,
     bytes[] calldata _accessories,
     string[] calldata _names
   ) external override onlyOwner whenPartsNotLocked {
     for (uint256 i = 0; i < _accessories.length; i++) {
-      _addAccessory(prefectureId, _accessories[i], _names[i]);
+      _addAccessory(_accessories[i]);
     }
   }
 
@@ -214,12 +186,12 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @dev This function can only be called by the owner when not locked.
    */
   function addManyHeads(
-    uint256 prefectureId,
+    uint256 _eventId,
     bytes[] calldata _heads,
     string[] calldata _names
   ) external override onlyOwner whenPartsNotLocked {
     for (uint256 i = 0; i < _heads.length; i++) {
-      _addHead(prefectureId, _heads[i], _names[i]);
+      _addHead(_eventId, _heads[i], _names[i]);
     }
   }
 
@@ -263,11 +235,9 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @dev This function can only be called by the owner when not locked.
    */
   function addAccessory(
-    uint256 prefectureId,
-    bytes calldata _accessory,
-    string calldata _name
+    bytes calldata _accessory
   ) external override onlyOwner whenPartsNotLocked {
-    _addAccessory(prefectureId, _accessory, _name);
+    _addAccessory(_accessory);
   }
 
   /**
@@ -275,11 +245,11 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @dev This function can only be called by the owner when not locked.
    */
   function addHead(
-    uint256 prefectureId,
+    uint256 _eventId,
     bytes calldata _head,
     string calldata _name
   ) external override onlyOwner whenPartsNotLocked {
-    _addHead(prefectureId, _head, _name);
+    _addHead(_eventId, _head, _name);
   }
 
   /**
@@ -400,17 +370,16 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   /**
    * @notice Add a Noun accessory.
    */
-  function _addAccessory(uint256 prefectureId, bytes calldata _accessory, string calldata _name) internal {
-    prefectureAccessories[prefectureId].push(accessories.length);
-    AccessoriesName[accessories.length] = _name;
-    accessories.push(_accessory);
+  function _addAccessory(bytes calldata _accessory) internal {
+    // nothing
+    // accessories.push(_accessory);
   }
 
   /**
    * @notice Add a Noun head.
    */
-  function _addHead(uint256 prefectureId, bytes calldata _head, string calldata _name) internal {
-    prefectureHeads[prefectureId].push(heads.length);
+  function _addHead(uint256 _eventId, bytes calldata _head, string calldata _name) internal {
+    eventHeads[_eventId].push(heads.length);
     headsName[heads.length] = _name;
     heads.push(_head);
   }
@@ -428,7 +397,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   function _getPartsForSeed(INounsSeeder.Seed memory seed) internal view returns (bytes[] memory) {
     bytes[] memory _parts = new bytes[](4);
     _parts[0] = descriptor.bodies(seed.body);
-    _parts[1] = accessories[seed.accessory];
+    _parts[1] = descriptor.accessories[seed.accessory];
     _parts[2] = heads[seed.head];
     _parts[3] = descriptor.glasses(seed.glasses);
     return _parts;
