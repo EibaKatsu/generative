@@ -18,9 +18,8 @@
 pragma solidity ^0.8.6;
 
 import { INounsSeeder } from './INounsSeeder.sol';
-import { INounsDescriptorMinimal } from './INounsDescriptorMinimal.sol';
 
-interface INounsDescriptor is INounsDescriptorMinimal {
+interface INounsDescriptor {
     event PartsLocked();
 
     event DataURIToggled(bool enabled);
@@ -45,23 +44,21 @@ interface INounsDescriptor is INounsDescriptorMinimal {
 
     function glasses(uint256 index) external view returns (bytes memory);
 
-    function backgroundCount() external view override returns (uint256);
+    function backgroundCount() external view returns (uint256);
 
-    function bodyCount() external view override returns (uint256);
+    function bodyCount() external view returns (uint256);
 
-    function accessoryCount() external view override returns (uint256);
+    function accessoryCount() external view returns (uint256);
 
-    function accessoryCountInPrefecture(uint256 prefectureId) external view returns (uint256);
+    function headCount() external view returns (uint256);
 
-    function accessoryName(uint256 partsId) external view returns (string memory);
-    
-    function headCount() external view override returns (uint256);
+    function headCountInEvent(uint256 eventId) external view returns (uint256);
 
-    function headCountInPrefecture(uint256 prefectureId) external view returns (uint256);
+    function headInEvent(uint256 eventId, uint256 seqNo) external view returns (uint256);
 
     function headName(uint256 partsId) external view returns (string memory);
 
-    function glassesCount() external view override returns (uint256);
+    function glassesCount() external view returns (uint256);
 
     function addManyColorsToPalette(uint8 paletteIndex, string[] calldata newColors) external;
 
@@ -69,9 +66,9 @@ interface INounsDescriptor is INounsDescriptorMinimal {
 
     function addManyBodies(bytes[] calldata bodies) external;
 
-    function addManyAccessories(uint256 prefectureId, bytes[] calldata accessories, string[] calldata name) external;
+    function addManyAccessories(bytes[] calldata accessories) external;
 
-    function addManyHeads(uint256 prefectureId, bytes[] calldata heads, string[] calldata name) external;
+    function addManyHeads(uint256 eventId, bytes[] calldata heads, string[] calldata name) external;
 
     function addManyGlasses(bytes[] calldata glasses) external;
 
@@ -81,9 +78,9 @@ interface INounsDescriptor is INounsDescriptorMinimal {
 
     function addBody(bytes calldata body) external;
 
-    function addAccessory(uint256 prefectureId, bytes calldata accessory, string calldata name) external;
+    function addAccessory(bytes calldata accessory) external;
 
-    function addHead(uint256 prefectureId, bytes calldata head, string calldata name) external;
+    function addHead(uint256 eventId, bytes calldata head, string calldata name) external;
 
     function addGlasses(bytes calldata glasses) external;
 
@@ -93,9 +90,9 @@ interface INounsDescriptor is INounsDescriptorMinimal {
 
     function setBaseURI(string calldata baseURI) external;
 
-    function tokenURI(uint256 tokenId, INounsSeeder.Seed memory seed) external view override returns (string memory);
+    function tokenURI(uint256 tokenId, INounsSeeder.Seed memory seed) external view returns (string memory);
 
-    function dataURI(uint256 tokenId, INounsSeeder.Seed memory seed) external view override returns (string memory);
+    function dataURI(uint256 tokenId, INounsSeeder.Seed memory seed) external view returns (string memory);
 
     function genericDataURI(
         string calldata name,

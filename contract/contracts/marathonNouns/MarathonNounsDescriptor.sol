@@ -65,7 +65,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   mapping(uint256 => uint256[]) public eventHeads;
 
   // parts index => parts name of heads
-  mapping(uint256 => string) public eventName;
+  mapping(uint256 => string) public headsName;
 
   constructor(INounsDescriptor _descriptor) {
     descriptor = _descriptor;
@@ -111,14 +111,14 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   /**
    * @notice Get the number of available Noun `heads` in the event.
    */
-  function headCountInEvent(uint256 eventId) external view override returns (uint256) {
+  function headCountInEvent(uint256 eventId) external view returns (uint256) {
     return eventHeads[eventId].length;
   }
 
   /**
    * @notice Get the number of available Noun `heads` in the event.
    */
-  function headInEvent(uint256 eventId, uint256 seqNo) external view override returns (uint256) {
+  function headInEvent(uint256 eventId, uint256 seqNo) external view returns (uint256) {
     return eventHeads[eventId][seqNo];
   }
 
@@ -173,9 +173,8 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @dev This function can only be called by the owner when not locked.
    */
   function addManyAccessories(
-    bytes[] calldata _accessories,
-    string[] calldata _names
-  ) external override onlyOwner whenPartsNotLocked {
+    bytes[] calldata _accessories
+  ) external onlyOwner whenPartsNotLocked {
     for (uint256 i = 0; i < _accessories.length; i++) {
       _addAccessory(_accessories[i]);
     }
@@ -236,7 +235,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    */
   function addAccessory(
     bytes calldata _accessory
-  ) external override onlyOwner whenPartsNotLocked {
+  ) external onlyOwner whenPartsNotLocked {
     _addAccessory(_accessory);
   }
 
@@ -397,7 +396,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
   function _getPartsForSeed(INounsSeeder.Seed memory seed) internal view returns (bytes[] memory) {
     bytes[] memory _parts = new bytes[](4);
     _parts[0] = descriptor.bodies(seed.body);
-    _parts[1] = descriptor.accessories[seed.accessory];
+    _parts[1] = descriptor.accessories(seed.accessory);
     _parts[2] = heads[seed.head];
     _parts[3] = descriptor.glasses(seed.glasses);
     return _parts;

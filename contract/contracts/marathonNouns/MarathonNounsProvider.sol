@@ -11,6 +11,7 @@ import './interfaces/IAssetProviderExMint.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/interfaces/IERC165.sol';
 import 'randomizer.sol/Randomizer.sol';
+import '../packages/graphics/SVG.sol';
 
 import { INounsDescriptor } from './interfaces/INounsDescriptor.sol';
 import { INounsSeeder } from './interfaces/INounsSeeder.sol';
@@ -18,25 +19,18 @@ import { INounsSeeder } from './interfaces/INounsSeeder.sol';
 contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   using Strings for uint256;
   using Randomizer for Randomizer.Seed;
+  using SVG for SVG.Element;
 
   string constant providerKey = 'MarathonNouns';
-  address public receiver;
-
-  uint256 public nextTokenId;
 
   INounsDescriptor public immutable descriptor;
   INounsDescriptor public immutable localDescriptor;
 
-  mapping(uint256 => uint256) public tokenIdToEventId;
   mapping(uint256 => string) public eventName;
-  mapping(uint256 => uint256) public mintNumberPerEvent; // イベントごとのミント数
 
   constructor(INounsDescriptor _descriptor, INounsDescriptor _localDescriptor) {
-    receiver = owner();
-
     descriptor = _descriptor;
     localDescriptor = _localDescriptor;
-
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -48,21 +42,17 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   }
 
   function getProviderInfo() external view override returns (ProviderInfo memory) {
-    return ProviderInfo(providerKey, 'Logo', this);
-  }
-
-  function totalSupply() external pure override returns (uint256) {
-    return 0; // indicating "dynamically (but deterministically) generated from the given assetId)
+    return ProviderInfo(providerKey, 'Marathon Nouns', this);
   }
 
   function processPayout(uint256 _assetId) external payable override {
-    address payable payableTo = payable(receiver);
+    address payable payableTo = payable(owner());
     payableTo.transfer(msg.value);
     emit Payout(providerKey, _assetId, payableTo, msg.value);
   }
 
-  function setReceiver(address _receiver) external onlyOwner {
-    receiver = _receiver;
+  function totalSupply() external pure override returns (uint256) {
+    return 0; // indicating "dynamically (but deterministically) generated from the given assetId)
   }
 
   function generateSeed(
@@ -107,39 +97,42 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   }
 
   function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
-    INounsSeeder.Seed memory seed = generateSeed(tokenIdToEventId[_assetId], _assetId);
+    INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
 
     svgPart = localDescriptor.generateSVGImage(seed);
     tag = string('');
   }
 
+  // For debugging
+  function generateSVGDocument(uint256 _assetId) external view returns (string memory svgDocument) {
+    string memory svgPart;
+    string memory tag;
+    (svgPart, tag) = generateSVGPart(_assetId);
+    svgDocument = string(SVG.document('0 0 1024 1024', bytes(svgPart), SVG.use(tag).svg()));
+  }
+
   function generateTraits(uint256 _assetId) external view override returns (string memory traits) {
-    INounsSeeder.Seed memory seed = generateSeed(tokenIdToEventId[_assetId], _assetId);
+    INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
 
     uint256 headPartsId = seed.head;
-    uint256 accessoryPartsId = seed.accessory;
     traits = string(
       abi.encodePacked(
-        '{"trait_type": "prefecture" , "value":"',
-        eventName[tokenIdToEventId[_assetId] % 100],
-        '"}',
-        ',{"trait_type": "head" , "value":"',
+        // '{"trait_type": "prefecture" , "value":"',
+        // eventName[tokenIdToEventId[_assetId] % 100],
+        // '"}',
+        '{"trait_type": "head" , "value":"',
         localDescriptor.headName(headPartsId),
-        '"}',
-        ',{"trait_type": "accessory" , "value":"',
-        localDescriptor.accessoryName(accessoryPartsId),
         '"}'
       )
     );
   }
 
-  function mint(uint256 _eventId, uint256 _assetId) external returns (uint256 _assetId) {
-    tokenIdToEventId[_assetId] = _eventId;
-    mintNumberPerEvent[_eventId]++;
-    nextTokenId++;
+  function mint(uint256 _eventId, uint256 _assetId) external returns (uint256) {
+    // TODO マラソン記録を格納する
+
   }
 
-  function getEventId(uint256 _tokenId) external view override returns (uint256) {
-    return tokenIdToEventId[_tokenId];
+  function getEventId(uint256 _tokenId) public view returns (uint256) {
+    return _tokenId % 1_000_000_000;
   }
 }

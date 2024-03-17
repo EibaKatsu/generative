@@ -102,6 +102,12 @@ import { addresses as localNounsToken_localhost } from "./addresses/localNounsTo
 import { addresses as localNounsMinter_mainnet } from "./addresses/localNounsMinter_mainnet";
 import { addresses as localNounsMinter_mumbai } from "./addresses/localNounsMinter_mumbai";
 import { addresses as localNounsMinter_localhost } from "./addresses/localNounsMinter_localhost";
+import { addresses as MarathonNounsDescriptor_mumbai } from "./addresses/MarathonNounsDescriptor_mumbai";
+import { addresses as MarathonNounsDescriptor_localhost } from "./addresses/MarathonNounsDescriptor_localhost";
+import { addresses as MarathonProvider_mumbai } from "./addresses/MarathonNounsProvider_mumbai";
+import { addresses as MarathonProvider_localhost } from "./addresses/MarathonNounsProvider_localhost";
+import { addresses as MarathonNounsToken_mumbai } from "./addresses/MarathonNounsToken_mumbai";
+import { addresses as MarathonNounsToken_localhost } from "./addresses/MarathonNounsToken_localhost";
 
 export interface Addresses {
   [key: string]: { [key: string]: string };
@@ -358,5 +364,17 @@ export const addresses: Addresses = {
     mainnet: localNounsMinter_mainnet.localNounsMinter,
     mumbai: localNounsMinter_mumbai.localNounsMinter,
     localhost: localNounsMinter_localhost.localNounsMinter,
+  },
+  MarathonNounsDescriptor: {
+    mumbai: MarathonNounsDescriptor_mumbai.MarathonNounsDescriptor,
+    localhost: MarathonNounsDescriptor_localhost.MarathonNounsDescriptor,
+  },
+  MarathonProvider: {
+    mumbai: MarathonProvider_mumbai.MarathonNounsProvider,
+    localhost: MarathonProvider_localhost.MarathonNounsProvider,
+  },
+  MarathonNounsToken: {
+    mumbai: MarathonNounsToken_mumbai.MarathonNounsToken,
+    localhost: MarathonNounsToken_localhost.MarathonNounsToken,
   },
 };
