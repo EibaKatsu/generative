@@ -132,7 +132,7 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   }
 
-  function getEventId(uint256 _tokenId) public view returns (uint256) {
+  function getEventId(uint256 _tokenId) public pure returns (uint256) {
     return _tokenId % 1_000_000_000;
   }
 }

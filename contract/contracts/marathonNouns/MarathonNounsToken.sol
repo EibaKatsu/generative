@@ -54,7 +54,7 @@ contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
             bytes(
               abi.encodePacked(
                 '{"name":"',
-                tokenName(_tokenId),
+                tag, tokenName(_tokenId),
                 '","description":"',
                 description,
                 '","attributes":[',

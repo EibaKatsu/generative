@@ -1,3 +1,3 @@
 export const addresses = {
-  MarathonNounsToken:"0x51A1ceB83B83F1985a81C295d1fF28Afef186E02",
+  MarathonNounsToken:"0xeC3C12061DbF5da77e816235EB63960bF4b50EbE",
 }
