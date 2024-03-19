@@ -369,7 +369,7 @@ export const addresses: Addresses = {
     mumbai: MarathonNounsDescriptor_mumbai.MarathonNounsDescriptor,
     localhost: MarathonNounsDescriptor_localhost.MarathonNounsDescriptor,
   },
-  MarathonProvider: {
+  MarathonNounsProvider: {
     mumbai: MarathonProvider_mumbai.MarathonNounsProvider,
     localhost: MarathonProvider_localhost.MarathonNounsProvider,
   },
