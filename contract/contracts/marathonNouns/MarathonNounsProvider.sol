@@ -24,13 +24,13 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   string constant providerKey = 'MarathonNouns';
 
   INounsDescriptor public immutable descriptor;
-  INounsDescriptor public immutable localDescriptor;
+  INounsDescriptor public immutable marathonDescriptor;
 
   mapping(uint256 => string) public eventName;
 
-  constructor(INounsDescriptor _descriptor, INounsDescriptor _localDescriptor) {
+  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor) {
     descriptor = _descriptor;
-    localDescriptor = _localDescriptor;
+    marathonDescriptor = _marathonDescriptor;
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -63,9 +63,9 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     Randomizer.Seed memory seed = Randomizer.Seed(_assetId, 0);
 
     // MarathonNounsのヘッドを決定
-    uint256 headCount = localDescriptor.headCountInEvent(eventId);
+    uint256 headCount = marathonDescriptor.headCountInEvent(eventId);
     (seed, pseudorandomness) = seed.random(headCount);
-    uint256 headPartId = localDescriptor.headInEvent(eventId, pseudorandomness);
+    uint256 headPartId = marathonDescriptor.headInEvent(eventId, pseudorandomness);
 
     // Nounsのアクセサリを決定
     uint256 accessoryCount = descriptor.accessoryCount();
@@ -99,7 +99,7 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
     INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
 
-    svgPart = localDescriptor.generateSVGImage(seed);
+    svgPart = marathonDescriptor.generateSVGImage(seed);
     tag = string('');
   }
 
@@ -121,7 +121,7 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
         // eventName[tokenIdToEventId[_assetId] % 100],
         // '"}',
         '{"trait_type": "head" , "value":"',
-        localDescriptor.headName(headPartsId),
+        marathonDescriptor.headName(headPartsId),
         '"}'
       )
     );
@@ -133,6 +133,6 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   }
 
   function getEventId(uint256 _tokenId) public pure returns (uint256) {
-    return _tokenId % 1_000_000_000;
+    return _tokenId / 1_000_000_000;
   }
 }

@@ -1,3 +1,3 @@
 export const addresses = {
-  tokenGate:"0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+  tokenGate:"0xa6e99A4ED7498b3cdDCBB61a6A607a4925Faa1B7",
 }
