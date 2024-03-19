@@ -27,14 +27,23 @@ async function main() {
   await writeFile(`../src/utils/addresses/MarathonNounsDescriptor_${network.name}.ts`, addresses2, () => { });
 
 
+  const factoryEventStore = await ethers.getContractFactory('EventStore');
+  const eventStore = await factoryEventStore.deploy();
+  await eventStore.deployed();
+  console.log(`##EventStore="${eventStore.address}"`);
+  await runCommand(`npx hardhat verify ${eventStore.address} --network ${network.name} &`);
+
+  const addresses3 = `export const addresses = {\n` + `  EventStore:"${eventStore.address}",\n` + `}\n`;
+  await writeFile(`../src/utils/addresses/EventStore_${network.name}.ts`, addresses3, () => { });
+
   const factoryProvider = await ethers.getContractFactory('MarathonNounsProvider');
-  const provider = await factoryProvider.deploy(nounsDescriptor, MarathonNounsDescriptor.address);
+  const provider = await factoryProvider.deploy(nounsDescriptor, MarathonNounsDescriptor.address, eventStore.address);
   await provider.deployed();
   console.log(`##MarathonNounsProvider="${provider.address}"`);
-  await runCommand(`npx hardhat verify ${provider.address} ${nounsDescriptor} ${MarathonNounsDescriptor.address} --network ${network.name} &`);
+  await runCommand(`npx hardhat verify ${provider.address} ${nounsDescriptor} ${MarathonNounsDescriptor.address} ${eventStore.address} --network ${network.name} &`);
 
-  const addresses3 = `export const addresses = {\n` + `  MarathonNounsProvider:"${provider.address}",\n` + `}\n`;
-  await writeFile(`../src/utils/addresses/MarathonNounsProvider_${network.name}.ts`, addresses3, () => { });
+  const addresses4 = `export const addresses = {\n` + `  MarathonNounsProvider:"${provider.address}",\n` + `}\n`;
+  await writeFile(`../src/utils/addresses/MarathonNounsProvider_${network.name}.ts`, addresses4, () => { });
 
   const factoryToken = await ethers.getContractFactory('MarathonNounsToken');
   const token = await factoryToken.deploy(provider.address, minter.address);
@@ -42,8 +51,8 @@ async function main() {
   console.log(`##MarathonNounsToken="${token.address}"`);
   await runCommand(`npx hardhat verify ${token.address} ${provider.address} ${minter.address} --network ${network.name} &`);
 
-  const addresses4 = `export const addresses = {\n` + `  MarathonNounsToken:"${token.address}",\n` + `}\n`;
-  await writeFile(`../src/utils/addresses/MarathonNounsToken_${network.name}.ts`, addresses4, () => { });
+  const addresses5 = `export const addresses = {\n` + `  MarathonNounsToken:"${token.address}",\n` + `}\n`;
+  await writeFile(`../src/utils/addresses/MarathonNounsToken_${network.name}.ts`, addresses5, () => { });
 
 }
 

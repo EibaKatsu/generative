@@ -8,6 +8,7 @@ pragma solidity ^0.8.6;
 
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IAssetProviderExMint.sol';
+import './interfaces/IEventStore.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/interfaces/IERC165.sol';
 import 'randomizer.sol/Randomizer.sol';
@@ -15,6 +16,7 @@ import '../packages/graphics/SVG.sol';
 
 import { INounsDescriptor } from './interfaces/INounsDescriptor.sol';
 import { INounsSeeder } from './interfaces/INounsSeeder.sol';
+import { Base64 } from 'base64-sol/base64.sol';
 
 contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   using Strings for uint256;
@@ -25,12 +27,14 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   INounsDescriptor public immutable descriptor;
   INounsDescriptor public immutable marathonDescriptor;
+  IEventStore public immutable eventStore;
 
   mapping(uint256 => string) public eventName;
 
-  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor) {
+  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor, IEventStore _eventStore) {
     descriptor = _descriptor;
     marathonDescriptor = _marathonDescriptor;
+    eventStore = _eventStore;
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -98,9 +102,53 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
     INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
+    tag = string('MarathonNouns');
 
-    svgPart = marathonDescriptor.generateSVGImage(seed);
-    tag = string('');
+    svgPart = svgForSeed(seed, tag);
+  }
+
+  function svgForSeed(INounsSeeder.Seed memory _seed, string memory _tag) public view returns (string memory svgPart) {
+    string memory encodedSvg = marathonDescriptor.generateSVGImage(_seed);
+    bytes memory svg = Base64.decode(encodedSvg);
+    uint256 length = svg.length;
+    uint256 start = 0;
+    for (uint256 i = 0; i < length; i++) {
+      if (uint8(svg[i]) == 0x2F && uint8(svg[i + 1]) == 0x3E) {
+        // "/>": looking for the end of <rect ../>
+        start = i + 2;
+        break;
+      }
+    }
+    length -= start + 6; // "</svg>"
+
+    // substring
+    /*
+    bytes memory ret = new bytes(length);
+    for(uint i = 0; i < length; i++) {
+        ret[i] = svg[i+start];
+    }
+    */
+
+    bytes memory ret;
+    assembly {
+      ret := mload(0x40)
+      mstore(ret, length)
+      let retMemory := add(ret, 0x20)
+      let svgMemory := add(add(svg, 0x20), start)
+      for {
+        let i := 0
+      } lt(i, length) {
+        i := add(i, 0x20)
+      } {
+        let data := mload(add(svgMemory, i))
+        mstore(add(retMemory, i), data)
+      }
+      mstore(0x40, add(add(ret, 0x20), length))
+    }
+
+    svgPart = string(
+      abi.encodePacked('<g id="', _tag, '" transform="scale(3.2)" shape-rendering="crispEdges">\n', ret, '\n</g>\n')
+    );
   }
 
   // For debugging
