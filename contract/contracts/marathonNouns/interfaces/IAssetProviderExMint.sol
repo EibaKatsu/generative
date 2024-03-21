@@ -21,6 +21,4 @@ interface IAssetProviderExMint is IAssetProvider {
 
   function mint(uint256 eventId, uint256 _assetId) external returns (uint256);
 
-  function generateSVGDocument(uint256 _assetId) external view returns(string memory document);
-
 }

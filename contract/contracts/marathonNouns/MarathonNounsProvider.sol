@@ -13,6 +13,8 @@ import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/interfaces/IERC165.sol';
 import 'randomizer.sol/Randomizer.sol';
 import '../packages/graphics/SVG.sol';
+import '../packages/graphics/Text.sol';
+import '../packages/graphics/IFontProvider.sol';
 
 import { INounsDescriptor } from './interfaces/INounsDescriptor.sol';
 import { INounsSeeder } from './interfaces/INounsSeeder.sol';
@@ -27,14 +29,14 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   INounsDescriptor public immutable descriptor;
   INounsDescriptor public immutable marathonDescriptor;
+  IFontProvider public immutable font;
   IEventStore public immutable eventStore;
 
-  mapping(uint256 => string) public eventName;
-
-  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor, IEventStore _eventStore) {
+  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor, IFontProvider _font, IEventStore _eventStore) {
     descriptor = _descriptor;
     marathonDescriptor = _marathonDescriptor;
     eventStore = _eventStore;
+    font = _font;
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -100,11 +102,44 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     });
   }
 
-  function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
-    INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
-    tag = string('MarathonNouns');
+  struct StackFrame {
+    SVG.Element background;
+    string nounsId;
+    string nounsSVGString;
+    SVG.Element nounsSVG;
+    SVG.Element nounsSVGUse;
 
-    svgPart = svgForSeed(seed, tag);
+    string eventNameString;
+    SVG.Element eventName;
+  }
+
+  function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
+    StackFrame memory stack;
+    tag = string(abi.encodePacked('nouns_', _assetId.toString()));
+
+    // main Noun
+    (stack.nounsSVGString, stack.nounsId) = generateNounsSVGPart(_assetId);
+    stack.nounsSVG = SVG.element(bytes(stack.nounsSVGString));
+    stack.nounsSVGUse = SVG.use(stack.nounsId).transform('translate(52,22) scale(0.9)');
+
+    // background
+    stack.background = SVG.rect().fill(eventStore.getBackground(getEventId(_assetId)));
+
+    // event title
+    stack.eventNameString = eventStore.getTitle(getEventId(_assetId));
+    stack.eventName = SVG.text(font, stack.eventNameString).fill('#224455').transform('translate(5, 5) scale(0.08)');
+
+    string memory svgPart1 = string(
+            SVG
+              .list(
+                [
+                  stack.nounsSVG,
+                  SVG.group([stack.background, stack.nounsSVGUse, stack.eventName]).id(tag)
+                ]
+              )
+              .svg());
+
+    svgPart = string(SVG.document('0 0 1024 1024', bytes(svgPart1), SVG.use(tag).svg()));
   }
 
   function svgForSeed(INounsSeeder.Seed memory _seed, string memory _tag) public view returns (string memory svgPart) {
@@ -120,14 +155,6 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
       }
     }
     length -= start + 6; // "</svg>"
-
-    // substring
-    /*
-    bytes memory ret = new bytes(length);
-    for(uint i = 0; i < length; i++) {
-        ret[i] = svg[i+start];
-    }
-    */
 
     bytes memory ret;
     assembly {
@@ -151,14 +178,6 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     );
   }
 
-  // For debugging
-  function generateSVGDocument(uint256 _assetId) external view returns (string memory svgDocument) {
-    string memory svgPart;
-    string memory tag;
-    (svgPart, tag) = generateSVGPart(_assetId);
-    svgDocument = string(SVG.document('0 0 1024 1024', bytes(svgPart), SVG.use(tag).svg()));
-  }
-
   function generateTraits(uint256 _assetId) external view override returns (string memory traits) {
     INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
 
@@ -178,6 +197,13 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   function mint(uint256 _eventId, uint256 _assetId) external returns (uint256) {
     // TODO マラソン記録を格納する
 
+  }
+
+  function generateNounsSVGPart(uint256 _assetId) public view returns (string memory svgPart, string memory tag) {
+    INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
+    tag = string('MarathonNouns');
+
+    svgPart = svgForSeed(seed, tag);
   }
 
   function getEventId(uint256 _tokenId) public pure returns (uint256) {

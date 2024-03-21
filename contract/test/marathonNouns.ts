@@ -5,20 +5,22 @@ import { ethers } from 'ethers';
 import { abi as marathonProviderABI } from "../artifacts/contracts/marathonNouns/MarathonNounsProvider.sol/MarathonNounsProvider";
 import { abi as marathonDescriptorABI } from "../artifacts/contracts/marathonNouns/MarathonNounsDescriptor.sol/MarathonNounsDescriptor";
 import { abi as marathonTokenABI } from "../artifacts/contracts/marathonNouns/MarathonNounsToken.sol/MarathonNounsToken";
+import { abi as eventStoreABI } from "../artifacts/contracts/marathonNouns/EventStore.sol/EventStore";
 
 let owner: SignerWithAddress, user1: SignerWithAddress, user2: SignerWithAddress, user3: SignerWithAddress, user4: SignerWithAddress, user5: SignerWithAddress, admin: SignerWithAddress, developper: SignerWithAddress;
-let token: Contract, descriptor: Contract, provider: Contract;
+let token: Contract, descriptor: Contract, provider: Contract, eventStore: Contract;
 
 const nounsDescriptorAddress = addresses.nounsDescriptor[network.name];
 const MarathonNounsDescriptorAddress = addresses.MarathonNounsDescriptor[network.name];
 const MarathonNounsProviderAddress = addresses.MarathonNounsProvider[network.name];
 const MarathonNounsTokenAddress = addresses.MarathonNounsToken[network.name];
+const EventStoreAddress = addresses.EventStore[network.name];
 
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 before(async () => {
     /* `npx hardhat node`実行後、このスクリプトを実行する前に、Nouns,MarathonNounsの関連するコントラクトを
-     * デプロイする必要があります。(1~5は一度実行すると、node停止までは再実施する必要なし)
+     * デプロイする必要があります。(1~6は一度実行すると、node停止までは再実施する必要なし)
 
          ## Termnal 1
         1 export NODE_OPTIONS=--max-old-space-size=4096 
@@ -28,9 +30,10 @@ before(async () => {
         3 cd contract
         4 npx hardhat run scripts/deploy_nounsDescriptorV1.ts
         5 npx hardhat run scripts/populate_nounsV1.ts
+        6 npx hardhat run scripts/deploy_font.ts
          
-        6 npx hardhat run scripts/deploy_marathonNouns.ts
-        7 npx hardhat run scripts/populate_marathonNouns.ts
+        7 npx hardhat run scripts/deploy_marathonNouns.ts
+        8 npx hardhat run scripts/populate_marathonNouns.ts
 
         note: `npx hardhat node`実行時にJavaScript heap out of memory が発生した場合は環境変数で使用メモリを指定する
         export NODE_OPTIONS=--max-old-space-size=4096
@@ -46,6 +49,7 @@ before(async () => {
     descriptor = await ethers.getContractAt(marathonDescriptorABI, MarathonNounsDescriptorAddress);
     provider = await ethers.getContractAt(marathonProviderABI, MarathonNounsProviderAddress);
     token = await ethers.getContractAt(marathonTokenABI, MarathonNounsTokenAddress);
+    eventStore = await ethers.getContractAt(eventStoreABI, EventStoreAddress);
 
 });
 
@@ -72,6 +76,30 @@ describe('descriptor test', function () {
     });
 });
 
+
+describe('eventStore test', function () {
+    let result, tx;
+
+    it('eventStore', async function () {
+        // eventStoreの登録
+        const event = {
+            eventId: 1,
+            name: "Toyama Marathon",
+            times: 8,
+            distance: "Full",
+            date: "2023.11.05",
+            year: "2023",
+            organizer: "",
+            background: "#FFCCD8",
+          }
+        await eventStore.functions.register(event);
+        
+        const [title] = await eventStore.functions.getTitle(1);
+        expect(title).to.equal('8th Toyama, 2023'); 
+
+    });
+});
+
 describe('provider test', function () {
     let result, tx;
 
@@ -86,7 +114,7 @@ describe('provider test', function () {
         const [traits] = await provider.functions.generateTraits(1000000001);
         expect(traits).to.equal('{"trait_type": "head" , "value":"Raicho"}'); 
 
-        const [svgData] = await provider.functions.generateSVGPart(1000000001);
+        const [svgData] = await provider.functions.generateSVGPart(1000004321);
         console.log("svgData",svgData);
 
     });

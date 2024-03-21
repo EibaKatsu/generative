@@ -5,6 +5,7 @@ import { addresses } from '../../src/utils/addresses';
 
 const nounsDescriptor = addresses.nounsDescriptor[network.name];
 const nftDescriptor = addresses.nftDescriptor[network.name];
+const fontProvider = addresses.londrina_solid[network.name];
 
 async function main() {
 
@@ -37,10 +38,10 @@ async function main() {
   await writeFile(`../src/utils/addresses/EventStore_${network.name}.ts`, addresses3, () => { });
 
   const factoryProvider = await ethers.getContractFactory('MarathonNounsProvider');
-  const provider = await factoryProvider.deploy(nounsDescriptor, MarathonNounsDescriptor.address, eventStore.address);
+  const provider = await factoryProvider.deploy(nounsDescriptor, MarathonNounsDescriptor.address, fontProvider, eventStore.address);
   await provider.deployed();
   console.log(`##MarathonNounsProvider="${provider.address}"`);
-  await runCommand(`npx hardhat verify ${provider.address} ${nounsDescriptor} ${MarathonNounsDescriptor.address} ${eventStore.address} --network ${network.name} &`);
+  await runCommand(`npx hardhat verify ${provider.address} ${nounsDescriptor} ${MarathonNounsDescriptor.address} ${fontProvider} ${eventStore.address} --network ${network.name} &`);
 
   const addresses4 = `export const addresses = {\n` + `  MarathonNounsProvider:"${provider.address}",\n` + `}\n`;
   await writeFile(`../src/utils/addresses/MarathonNounsProvider_${network.name}.ts`, addresses4, () => { });
