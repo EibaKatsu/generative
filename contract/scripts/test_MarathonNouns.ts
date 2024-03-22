@@ -32,26 +32,51 @@ async function main() {
 
   const event = {
     eventId: 1,
-    name: "Toyama",
+    name: "Toyama Marathon",
     times: 8,
-    distance: "Full",
     date: "2023.11.05",
     year: "2023",
     organizer: "",
-    background: "#FFCCD8",
+    background: "#AFEEEE",
   }
 
   tx = await eventStore.functions['register'](event);
   console.log("register event:", tx.hash);
 
-  for (var i: number = 0; i <= 3; i++) {
-    try {
-      tx = await marathonToken.functions['mintMarathonNFT'](wallet.address, ethers.BigNumber.from( String(1)));
-      console.log(`mint [`, i, `],tx=`,tx.hash);
-    } catch (error) {
-      console.log(`mint error [`, i, `]`, error);
-    };
+  // eventStoreの登録
+  const event2 = {
+    eventId: 2,
+    name: "Kanazawa Marathon",
+    times: 0,
+    date: "2023.10.29",
+    year: "2023",
+    organizer: "",
+    background: "#FFCCD8",
   }
+
+  tx = await eventStore.functions['register'](event2);
+  console.log("register event2:", tx.hash);
+      
+  const record = {
+    tokenId: 0,
+    distance: "42.195km",
+    grossTime: "4:02:11",
+    netTime: "3:58:33",
+    ranking: 2014,
+  }
+    
+  try {
+    for (var i: number = 0; i < 20; i++) {
+      tx = await marathonToken.functions['mintMarathonNFT'](wallet.address, 1, record);
+      console.log(`mint [`, i, `],tx=`,tx.hash);
+    }
+    for (var i: number = 0; i < 20; i++) {
+      tx = await marathonToken.functions['mintMarathonNFT'](wallet.address, 2, record);
+      console.log(`mint [`, i, `],tx=`,tx.hash);
+    }
+  } catch (error) {
+    console.log(`mint error`, error);
+  };
 
 }
 

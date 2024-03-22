@@ -13,6 +13,7 @@ import { Base64 } from 'base64-sol/base64.sol';
 import { INounsSeeder } from './interfaces/INounsSeeder.sol';
 import './interfaces/IAssetProviderExMint.sol';
 import './interfaces/IMarathonNounsToken.sol';
+import './interfaces/ITimeRecordStore.sol';
 
 contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
   using Strings for uint256;
@@ -21,15 +22,18 @@ contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
 
   string public description;
   IAssetProviderExMint public assetProvider;
+  ITimeRecordStore public timeRecordStore;
   mapping(address => bool) public mintableAddress;
   mapping(uint256 => uint256) public tokenIdPerEvent;
 
   constructor(
     IAssetProviderExMint _assetProvider,
-    address _minter
+    address _minter,
+    ITimeRecordStore _timeRecordStore
   ) ERC721('Marathon Nouns', 'Marathon Nouns') {
     description = 'Marathon NFT';
     assetProvider = _assetProvider;
+    timeRecordStore = _timeRecordStore;
 
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _grantRole(MINTER_ROLE, _minter);
@@ -54,7 +58,7 @@ contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
             bytes(
               abi.encodePacked(
                 '{"name":"',
-                tag, tokenName(_tokenId),
+                tokenName(_tokenId),
                 '","description":"',
                 description,
                 '","attributes":[',
@@ -74,7 +78,8 @@ contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
    */
   function mintMarathonNFT(
     address _to,
-    uint256 _eventId
+    uint256 _eventId,
+    ITimeRecordStore.TimeRecord memory _record
   ) public virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
 
     // tokenIdの採番
@@ -83,7 +88,8 @@ contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
 
     // ミント
     _safeMint(_to, tokenId);
-    assetProvider.mint(_eventId, tokenId);
+    _record.tokenId = tokenId;
+    timeRecordStore.register(_record);
   }
 
   function setMinter(address _minter, bool _val) external onlyRole(DEFAULT_ADMIN_ROLE) {

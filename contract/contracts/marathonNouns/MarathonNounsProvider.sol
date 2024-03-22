@@ -9,6 +9,7 @@ pragma solidity ^0.8.6;
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IAssetProviderExMint.sol';
 import './interfaces/IEventStore.sol';
+import './interfaces/ITimeRecordStore.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/interfaces/IERC165.sol';
 import 'randomizer.sol/Randomizer.sol';
@@ -24,6 +25,7 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   using Strings for uint256;
   using Randomizer for Randomizer.Seed;
   using SVG for SVG.Element;
+  using TX for string;
 
   string constant providerKey = 'MarathonNouns';
 
@@ -31,11 +33,13 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   INounsDescriptor public immutable marathonDescriptor;
   IFontProvider public immutable font;
   IEventStore public immutable eventStore;
+  ITimeRecordStore public immutable timeRecordStore;
 
-  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor, IFontProvider _font, IEventStore _eventStore) {
+  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor, IFontProvider _font, IEventStore _eventStore, ITimeRecordStore _timeRecordStore) {
     descriptor = _descriptor;
     marathonDescriptor = _marathonDescriptor;
     eventStore = _eventStore;
+    timeRecordStore = _timeRecordStore;
     font = _font;
   }
 
@@ -102,8 +106,40 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     });
   }
 
+  function generateTraits(uint256 _assetId) external view override returns (string memory traits) {
+    INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
+    IEventStore.Event memory _event = eventStore.getEvent(getEventId(_assetId));
+    ITimeRecordStore.TimeRecord memory _record = timeRecordStore.getTimeRecord(_assetId);
+
+    uint256 headPartsId = seed.head;
+    traits = string(
+      abi.encodePacked(
+        '{"trait_type": "event name" , "value":"',
+        eventStore.getTitle(getEventId(_assetId)),
+        '"},',
+        '{"trait_type": "date" , "value":"',
+        _event.date,
+        '"},',
+        '{"trait_type": "net time" , "value":"',
+        _record.netTime,
+        '"},',
+        '{"trait_type": "gross time" , "value":"',
+        _record.grossTime,
+        '"},',
+        '{"trait_type": "distance" , "value":"',
+        _record.distance,
+        '"},',
+        '{"trait_type": "head" , "value":"',
+        marathonDescriptor.headName(headPartsId),
+        '"}'
+      )
+    );
+  }
+
   struct StackFrame {
     SVG.Element background;
+    SVG.Element headerArea;
+    SVG.Element footerArea;
     string nounsId;
     string nounsSVGString;
     SVG.Element nounsSVG;
@@ -111,35 +147,58 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
     string eventNameString;
     SVG.Element eventName;
+    uint eventNameWidth;
+
+    SVG.Element netTime;
+    SVG.Element grossTime;
+    SVG.Element distance;
   }
 
   function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
+    string memory svg;
+    (svg,tag) = generateSVG(_assetId);
+    svgPart = Base64.encode(bytes(svg));
+  }
+
+  function generateSVG(uint256 _assetId) public view returns (string memory svgPart, string memory tag) {
     StackFrame memory stack;
     tag = string(abi.encodePacked('nouns_', _assetId.toString()));
 
     // main Noun
     (stack.nounsSVGString, stack.nounsId) = generateNounsSVGPart(_assetId);
     stack.nounsSVG = SVG.element(bytes(stack.nounsSVGString));
-    stack.nounsSVGUse = SVG.use(stack.nounsId).transform('translate(52,22) scale(0.9)');
+    stack.nounsSVGUse = SVG.use(stack.nounsId).transform('translate(22,124) scale(0.9)');
 
     // background
     stack.background = SVG.rect().fill(eventStore.getBackground(getEventId(_assetId)));
+    stack.headerArea = SVG.rect(0, 0, 1024, 100).fill('#E3E548').opacity('0.5');
+    stack.footerArea = SVG.rect(0, 900, 1024, 124).fill('#E3E548').opacity('0.5');
+    SVG.Element memory backgroundGroup = SVG.group([stack.background, stack.headerArea, stack.footerArea]);
 
     // event title
     stack.eventNameString = eventStore.getTitle(getEventId(_assetId));
-    stack.eventName = SVG.text(font, stack.eventNameString).fill('#224455').transform('translate(5, 5) scale(0.08)');
+    // stack.eventName = SVG.text(font, stack.eventNameString).fill('#224455').transform('translate(10, 10) scale(0.08)');
+    stack.eventNameWidth = SVG.textWidth(font, stack.eventNameString);
+    stack.eventName = SVG.text(font, stack.eventNameString).fill('#224455').transform(TX.translate(10, 12).scale1000((1000 * 1000) / stack.eventNameWidth));
+
+    // time record
+    SVG.Element memory finish = SVG.text(font, 'Finish').fill('#224455').transform('translate(20, 915) scale(0.05)');
+    stack.distance = SVG.text(font, timeRecordStore.getDistance(_assetId)).fill('#224455').transform('translate(20, 965) scale(0.05)');
+    stack.netTime = SVG.text(font, timeRecordStore.getNetTime(_assetId)).fill('#224455').transform('translate(700, 915) scale(0.05)');
+    stack.grossTime = SVG.text(font, timeRecordStore.getGrossTime(_assetId)).fill('#224455').transform('translate(700, 965) scale(0.05)');
+    SVG.Element memory recordGroup = SVG.group([finish, stack.netTime, stack.grossTime, stack.distance]);
 
     string memory svgPart1 = string(
-            SVG
-              .list(
-                [
-                  stack.nounsSVG,
-                  SVG.group([stack.background, stack.nounsSVGUse, stack.eventName]).id(tag)
-                ]
-              )
-              .svg());
+      SVG
+        .list(
+          [
+            stack.nounsSVG,
+            SVG.group([backgroundGroup, stack.nounsSVGUse, stack.eventName, recordGroup]).id(tag)
+          ]
+        ).svg());
 
     svgPart = string(SVG.document('0 0 1024 1024', bytes(svgPart1), SVG.use(tag).svg()));
+
   }
 
   function svgForSeed(INounsSeeder.Seed memory _seed, string memory _tag) public view returns (string memory svgPart) {
@@ -175,22 +234,6 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
     svgPart = string(
       abi.encodePacked('<g id="', _tag, '" transform="scale(3.2)" shape-rendering="crispEdges">\n', ret, '\n</g>\n')
-    );
-  }
-
-  function generateTraits(uint256 _assetId) external view override returns (string memory traits) {
-    INounsSeeder.Seed memory seed = generateSeed(getEventId(_assetId), _assetId);
-
-    uint256 headPartsId = seed.head;
-    traits = string(
-      abi.encodePacked(
-        // '{"trait_type": "prefecture" , "value":"',
-        // eventName[tokenIdToEventId[_assetId] % 100],
-        // '"}',
-        '{"trait_type": "head" , "value":"',
-        marathonDescriptor.headName(headPartsId),
-        '"}'
-      )
     );
   }
 

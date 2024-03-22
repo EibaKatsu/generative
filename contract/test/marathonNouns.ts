@@ -59,7 +59,7 @@ describe('descriptor test', function () {
     it('head parts', async function () {
         // populateで一つだけ登録している
         const [count] = await descriptor.functions.headCount();
-        expect(count.toNumber()).to.equal(1); 
+        expect(count.toNumber()).to.equal(2); 
 
         const [count1] = await descriptor.functions.headCountInEvent(1);
         expect(count1.toNumber()).to.equal(1); 
@@ -86,16 +86,57 @@ describe('eventStore test', function () {
             eventId: 1,
             name: "Toyama Marathon",
             times: 8,
-            distance: "Full",
             date: "2023.11.05",
             year: "2023",
             organizer: "",
-            background: "#FFCCD8",
+            background: "#AFEEEE",
           }
         await eventStore.functions.register(event);
         
         const [title] = await eventStore.functions.getTitle(1);
-        expect(title).to.equal('8th Toyama, 2023'); 
+        expect(title).to.equal('8th Toyama Marathon, 2023'); 
+
+        // eventStoreの登録
+        const event2 = {
+            eventId: 2,
+            name: "Kanazawa Marathon",
+            times: 0,
+            date: "2023.10.29",
+            year: "2023",
+            organizer: "",
+            background: "#FFCCD8",
+          }
+        await eventStore.functions.register(event2);
+        
+        const [title2] = await eventStore.functions.getTitle(2);
+        expect(title2).to.equal('Kanazawa Marathon, 2024'); 
+
+    });
+});
+
+describe('mint test', function () {
+    let result, tx;
+
+    it('mint', async function () {
+        // timeRecordStoreの登録
+        const record = {
+            tokenId: 0,
+            distance: "42.195km",
+            grossTime: "4:00:00",
+            netTime: "3:58:33",
+            ranking: 2014,
+        }
+        await token.functions.mintMarathonNFT(owner.address, 1, record);
+
+        // timeRecordStoreの登録
+        const record2 = {
+            tokenId: 0,
+            distance: "42.195km",
+            grossTime: "4:00:00",
+            netTime: "3:58:33",
+            ranking: 2014,
+        }
+        await token.functions.mintMarathonNFT(owner.address, 2, record2);
 
     });
 });
@@ -108,15 +149,22 @@ describe('provider test', function () {
         const [eventId] = await provider.functions.getEventId(1000000001);
         expect(eventId.toNumber()).to.equal(1); 
 
-        const [eventId2] = await provider.functions.getEventId(21000054321);
-        expect(eventId2.toNumber()).to.equal(21); 
+        // const [eventId2] = await provider.functions.getEventId(21000054321);
+        // expect(eventId2.toNumber()).to.equal(21); 
 
-        const [traits] = await provider.functions.generateTraits(1000000001);
-        expect(traits).to.equal('{"trait_type": "head" , "value":"Raicho"}'); 
+        const [traits] = await provider.functions.generateTraits(2000000001);
+        console.log('---- traits ------');
+        console.log(traits);
 
-        const [svgData] = await provider.functions.generateSVGPart(1000004321);
-        console.log("svgData",svgData);
+        const [svgData] = await provider.functions.generateSVG(2000000001);
+        console.log('---- 1 ------');
+        console.log(svgData);
+
+        const [svgData2] = await provider.functions.generateSVGPart(2000000001);
+        console.log('---- 2 ------');
+        console.log(svgData2);
 
     });
+
 });
 

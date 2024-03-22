@@ -110,6 +110,8 @@ import { addresses as MarathonNounsToken_mumbai } from "./addresses/MarathonNoun
 import { addresses as MarathonNounsToken_localhost } from "./addresses/MarathonNounsToken_localhost";
 import { addresses as EventStore_mumbai } from "./addresses/EventStore_mumbai";
 import { addresses as EventStore_localhost } from "./addresses/EventStore_localhost";
+import { addresses as TimeRecordStore_mumbai } from "./addresses/TimeRecordStore_mumbai";
+import { addresses as TimeRecordStore_localhost } from "./addresses/TimeRecordStore_localhost";
 
 export interface Addresses {
   [key: string]: { [key: string]: string };
@@ -382,5 +384,9 @@ export const addresses: Addresses = {
   EventStore: {
     mumbai: EventStore_mumbai.EventStore,
     localhost: EventStore_localhost.EventStore,
+  },
+  TimeRecordStore: {
+    mumbai: TimeRecordStore_mumbai.TimeRecordStore,
+    localhost: TimeRecordStore_localhost.TimeRecordStore,
   },
 };
