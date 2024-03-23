@@ -35,7 +35,13 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
   IEventStore public immutable eventStore;
   ITimeRecordStore public immutable timeRecordStore;
 
-  constructor(INounsDescriptor _descriptor, INounsDescriptor _marathonDescriptor, IFontProvider _font, IEventStore _eventStore, ITimeRecordStore _timeRecordStore) {
+  constructor(
+    INounsDescriptor _descriptor,
+    INounsDescriptor _marathonDescriptor,
+    IFontProvider _font,
+    IEventStore _eventStore,
+    ITimeRecordStore _timeRecordStore
+  ) {
     descriptor = _descriptor;
     marathonDescriptor = _marathonDescriptor;
     eventStore = _eventStore;
@@ -65,10 +71,7 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     return 0; // indicating "dynamically (but deterministically) generated from the given assetId)
   }
 
-  function generateSeed(
-    uint256 eventId,
-    uint256 _assetId
-  ) internal view returns (INounsSeeder.Seed memory mixedSeed) {
+  function generateSeed(uint256 eventId, uint256 _assetId) internal view returns (INounsSeeder.Seed memory mixedSeed) {
     uint256 pseudorandomness;
     Randomizer.Seed memory seed = Randomizer.Seed(_assetId, 0);
 
@@ -144,11 +147,9 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     string nounsSVGString;
     SVG.Element nounsSVG;
     SVG.Element nounsSVGUse;
-
     string eventNameString;
     SVG.Element eventName;
     uint eventNameWidth;
-
     SVG.Element netTime;
     SVG.Element grossTime;
     SVG.Element distance;
@@ -156,7 +157,7 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   function generateSVGPart(uint256 _assetId) public view override returns (string memory svgPart, string memory tag) {
     string memory svg;
-    (svg,tag) = generateSVG(_assetId);
+    (svg, tag) = generateSVG(_assetId);
     svgPart = Base64.encode(bytes(svg));
   }
 
@@ -179,26 +180,30 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
     stack.eventNameString = eventStore.getTitle(getEventId(_assetId));
     // stack.eventName = SVG.text(font, stack.eventNameString).fill('#224455').transform('translate(10, 10) scale(0.08)');
     stack.eventNameWidth = SVG.textWidth(font, stack.eventNameString);
-    stack.eventName = SVG.text(font, stack.eventNameString).fill('#224455').transform(TX.translate(10, 12).scale1000((1000 * 1000) / stack.eventNameWidth));
+    stack.eventName = SVG.text(font, stack.eventNameString).fill('#224455').transform(
+      TX.translate(10, 12).scale1000((1000 * 1000) / stack.eventNameWidth)
+    );
 
     // time record
     SVG.Element memory finish = SVG.text(font, 'Finish').fill('#224455').transform('translate(20, 915) scale(0.05)');
-    stack.distance = SVG.text(font, timeRecordStore.getDistance(_assetId)).fill('#224455').transform('translate(20, 965) scale(0.05)');
-    stack.netTime = SVG.text(font, timeRecordStore.getNetTime(_assetId)).fill('#224455').transform('translate(700, 915) scale(0.05)');
-    stack.grossTime = SVG.text(font, timeRecordStore.getGrossTime(_assetId)).fill('#224455').transform('translate(700, 965) scale(0.05)');
+    stack.distance = SVG.text(font, timeRecordStore.getDistance(_assetId)).fill('#224455').transform(
+      'translate(20, 965) scale(0.05)'
+    );
+    stack.netTime = SVG.text(font, timeRecordStore.getNetTime(_assetId)).fill('#224455').transform(
+      'translate(700, 915) scale(0.05)'
+    );
+    stack.grossTime = SVG.text(font, timeRecordStore.getGrossTime(_assetId)).fill('#224455').transform(
+      'translate(700, 965) scale(0.05)'
+    );
     SVG.Element memory recordGroup = SVG.group([finish, stack.netTime, stack.grossTime, stack.distance]);
 
     string memory svgPart1 = string(
       SVG
-        .list(
-          [
-            stack.nounsSVG,
-            SVG.group([backgroundGroup, stack.nounsSVGUse, stack.eventName, recordGroup]).id(tag)
-          ]
-        ).svg());
+        .list([stack.nounsSVG, SVG.group([backgroundGroup, stack.nounsSVGUse, stack.eventName, recordGroup]).id(tag)])
+        .svg()
+    );
 
     svgPart = string(SVG.document('0 0 1024 1024', bytes(svgPart1), SVG.use(tag).svg()));
-
   }
 
   function svgForSeed(INounsSeeder.Seed memory _seed, string memory _tag) public view returns (string memory svgPart) {
@@ -239,7 +244,6 @@ contract MarathonNounsProvider is IAssetProviderExMint, IERC165, Ownable {
 
   function mint(uint256 _eventId, uint256 _assetId) external returns (uint256) {
     // TODO マラソン記録を格納する
-
   }
 
   function generateNounsSVGPart(uint256 _assetId) public view returns (string memory svgPart, string memory tag) {

@@ -10,11 +10,11 @@ contract EventStore is IEventStore, Ownable {
   using Strings for uint8;
 
   mapping(uint256 => Event) private eventIdToEvent;
-  address public provider ;
+  address public provider;
 
   ////////// modifiers //////////
   modifier onlyProviderOrOwner() {
-    require(owner() == _msgSender() || provider == _msgSender(), "Not owner or provider");
+    require(owner() == _msgSender() || provider == _msgSender(), 'Not owner or provider');
     _;
   }
 
@@ -26,7 +26,7 @@ contract EventStore is IEventStore, Ownable {
   function setProvider(address _provider) external onlyOwner {
     provider = _provider;
   }
-  
+
   function getEvent(uint256 _eventId) external view returns (Event memory output) {
     output = eventIdToEvent[_eventId];
   }
@@ -36,24 +36,27 @@ contract EventStore is IEventStore, Ownable {
   }
 
   function getTitle(uint256 _eventId) external view returns (string memory output) {
-    
     string memory times;
     string memory unit;
-    if(eventIdToEvent[_eventId].times > 0){
-      if(eventIdToEvent[_eventId].times % 10 == 1){
+    if (eventIdToEvent[_eventId].times > 0) {
+      if (
+        eventIdToEvent[_eventId].times % 100 == 11 ||
+        eventIdToEvent[_eventId].times % 100 == 12 ||
+        eventIdToEvent[_eventId].times % 100 == 13
+      ) {
+        unit = 'th';
+      } else if (eventIdToEvent[_eventId].times % 10 == 1) {
         unit = 'st';
-      } else if(eventIdToEvent[_eventId].times % 10 == 2){
+      } else if (eventIdToEvent[_eventId].times % 10 == 2) {
         unit = 'nd';
-      } else if(eventIdToEvent[_eventId].times % 10 == 3){
+      } else if (eventIdToEvent[_eventId].times % 10 == 3) {
         unit = 'rd';
-      }else{
+      } else {
         unit = 'th';
       }
       times = string(abi.encodePacked(eventIdToEvent[_eventId].times.toString(), unit, ' '));
     }
 
-    output = string(
-      abi.encodePacked(times, eventIdToEvent[_eventId].name, ', ', eventIdToEvent[_eventId].year
-      ));
+    output = string(abi.encodePacked(times, eventIdToEvent[_eventId].name, ', ', eventIdToEvent[_eventId].year));
   }
 }

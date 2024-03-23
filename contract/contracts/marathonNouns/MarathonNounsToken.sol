@@ -18,7 +18,7 @@ import './interfaces/ITimeRecordStore.sol';
 contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
   using Strings for uint256;
 
-  bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+  bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
 
   string public description;
   IAssetProviderExMint public assetProvider;
@@ -81,7 +81,6 @@ contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
     uint256 _eventId,
     ITimeRecordStore.TimeRecord memory _record
   ) public virtual onlyRole(MINTER_ROLE) returns (uint256 tokenId) {
-
     // tokenIdの採番
     tokenIdPerEvent[_eventId]++;
     tokenId = _eventId * 1_000_000_000 + tokenIdPerEvent[_eventId];
@@ -110,8 +109,8 @@ contract MarathonNounsToken is ERC721, IMarathonNounsToken, AccessControl {
     uri = tokenURI(_tokenId);
     gas -= gasleft();
   }
-function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC721) returns (bool) {
-    return interfaceId == type(IMarathonNounsToken).interfaceId || super.supportsInterface(interfaceId);
-}
 
+  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC721) returns (bool) {
+    return interfaceId == type(IMarathonNounsToken).interfaceId || super.supportsInterface(interfaceId);
+  }
 }

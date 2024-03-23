@@ -20,5 +20,4 @@ interface ITimeRecordStore {
   function getGrossTime(uint256 _tokenId) external view returns (string memory output);
 
   function getDistance(uint256 _tokenId) external view returns (string memory output);
-
 }

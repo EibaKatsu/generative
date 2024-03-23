@@ -10,11 +10,11 @@ contract TimeRecordStore is ITimeRecordStore, Ownable {
   using Strings for uint8;
 
   mapping(uint256 => TimeRecord) private tokenIdToTimeRecord;
-  address public provider ;
+  address public provider;
 
   ////////// modifiers //////////
   modifier onlyProviderOrOwner() {
-    require(owner() == _msgSender() || provider == _msgSender(), "Not owner or provider");
+    require(owner() == _msgSender() || provider == _msgSender(), 'Not owner or provider');
     _;
   }
 
@@ -26,7 +26,7 @@ contract TimeRecordStore is ITimeRecordStore, Ownable {
   function setProvider(address _provider) external onlyOwner {
     provider = _provider;
   }
-  
+
   function getTimeRecord(uint256 _tokenId) external view returns (TimeRecord memory output) {
     output = tokenIdToTimeRecord[_tokenId];
   }
@@ -42,5 +42,4 @@ contract TimeRecordStore is ITimeRecordStore, Ownable {
   function getDistance(uint256 _tokenId) external view returns (string memory output) {
     output = tokenIdToTimeRecord[_tokenId].distance;
   }
-
 }

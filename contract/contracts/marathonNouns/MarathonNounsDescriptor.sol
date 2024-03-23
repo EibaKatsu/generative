@@ -172,9 +172,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Batch add Noun accessories.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addManyAccessories(
-    bytes[] calldata _accessories
-  ) external onlyOwner whenPartsNotLocked {
+  function addManyAccessories(bytes[] calldata _accessories) external onlyOwner whenPartsNotLocked {
     for (uint256 i = 0; i < _accessories.length; i++) {
       _addAccessory(_accessories[i]);
     }
@@ -233,9 +231,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Add a Noun accessory.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addAccessory(
-    bytes calldata _accessory
-  ) external onlyOwner whenPartsNotLocked {
+  function addAccessory(bytes calldata _accessory) external onlyOwner whenPartsNotLocked {
     _addAccessory(_accessory);
   }
 

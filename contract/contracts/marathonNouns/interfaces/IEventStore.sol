@@ -20,5 +20,4 @@ interface IEventStore {
   function getTitle(uint256 _eventId) external view returns (string memory output);
 
   function getBackground(uint256 _eventId) external view returns (string memory output);
-
 }
