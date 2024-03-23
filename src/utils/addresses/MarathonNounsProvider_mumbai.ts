@@ -1,3 +1,3 @@
 export const addresses = {
-  MarathonNounsProvider:"0xA8a7550137D5E5aAa96D6C5223Dc8191B1964824",
+  MarathonNounsProvider:"0x812AA1bC1f1D444094d4921C6Ed4B4733eb5A07a",
 }

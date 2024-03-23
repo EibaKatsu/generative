@@ -1,3 +1,3 @@
 export const addresses = {
-  EventStore:"0xe2d5A629B16B64c93d9DfBAfA77ABd800995628D",
+  EventStore:"0x7E7beF1Ebf2727EB083395e3Bd5bFb3Da36E9b6b",
 }
