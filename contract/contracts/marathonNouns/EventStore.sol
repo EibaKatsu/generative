@@ -4,26 +4,24 @@ pragma solidity ^0.8.6;
 
 import '@openzeppelin/contracts/utils/Strings.sol';
 import './interfaces/IEventStore.sol';
-import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/access/AccessControl.sol';
 
-contract EventStore is IEventStore, Ownable {
+contract EventStore is IEventStore, AccessControl {
   using Strings for uint8;
 
   mapping(uint256 => Event) private eventIdToEvent;
   address public provider;
 
-  ////////// modifiers //////////
-  modifier onlyProviderOrOwner() {
-    require(owner() == _msgSender() || provider == _msgSender(), 'Not owner or provider');
-    _;
+  constructor() {
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
   }
 
-  function register(Event memory _event) external onlyProviderOrOwner returns (uint256) {
+  function register(Event memory _event) external onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
     eventIdToEvent[_event.eventId] = _event;
     return _event.eventId;
   }
 
-  function setProvider(address _provider) external onlyOwner {
+  function setProvider(address _provider) external onlyRole(DEFAULT_ADMIN_ROLE) {
     provider = _provider;
   }
 

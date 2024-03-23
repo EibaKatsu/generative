@@ -17,14 +17,14 @@
 
 pragma solidity ^0.8.6;
 
-import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/access/AccessControl.sol';
 import { Strings } from '@openzeppelin/contracts/utils/Strings.sol';
 import { INounsDescriptor } from './interfaces/INounsDescriptor.sol';
 import { INounsSeeder } from './interfaces/INounsSeeder.sol';
 import { MultiPartRLEToSVG } from '../external/nouns/libs/MultiPartRLEToSVG.sol';
 import { NFTDescriptor } from '../external/nouns/libs/NFTDescriptor.sol';
 
-contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
+contract MarathonNounsDescriptor is INounsDescriptor, AccessControl {
   using Strings for uint256;
 
   // original
@@ -69,6 +69,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
 
   constructor(INounsDescriptor _descriptor) {
     descriptor = _descriptor;
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
   }
 
   /**
@@ -141,7 +142,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Add colors to a color palette.
    * @dev This function can only be called by the owner.
    */
-  function addManyColorsToPalette(uint8 paletteIndex, string[] calldata newColors) external override onlyOwner {
+  function addManyColorsToPalette(uint8 paletteIndex, string[] calldata newColors) external override onlyRole(DEFAULT_ADMIN_ROLE) {
     require(palettes[paletteIndex].length + newColors.length <= 256, 'Palettes can only hold 256 colors');
     for (uint256 i = 0; i < newColors.length; i++) {
       _addColorToPalette(paletteIndex, newColors[i]);
@@ -152,7 +153,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Batch add Noun backgrounds.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addManyBackgrounds(string[] calldata _backgrounds) external override onlyOwner whenPartsNotLocked {
+  function addManyBackgrounds(string[] calldata _backgrounds) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     for (uint256 i = 0; i < _backgrounds.length; i++) {
       _addBackground(_backgrounds[i]);
     }
@@ -162,7 +163,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Batch add Noun bodies.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addManyBodies(bytes[] calldata _bodies) external override onlyOwner whenPartsNotLocked {
+  function addManyBodies(bytes[] calldata _bodies) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     for (uint256 i = 0; i < _bodies.length; i++) {
       _addBody(_bodies[i]);
     }
@@ -172,7 +173,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Batch add Noun accessories.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addManyAccessories(bytes[] calldata _accessories) external onlyOwner whenPartsNotLocked {
+  function addManyAccessories(bytes[] calldata _accessories) external onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     for (uint256 i = 0; i < _accessories.length; i++) {
       _addAccessory(_accessories[i]);
     }
@@ -186,7 +187,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
     uint256 _eventId,
     bytes[] calldata _heads,
     string[] calldata _names
-  ) external override onlyOwner whenPartsNotLocked {
+  ) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     for (uint256 i = 0; i < _heads.length; i++) {
       _addHead(_eventId, _heads[i], _names[i]);
     }
@@ -196,7 +197,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Batch add Noun glasses.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addManyGlasses(bytes[] calldata _glasses) external override onlyOwner whenPartsNotLocked {
+  function addManyGlasses(bytes[] calldata _glasses) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     for (uint256 i = 0; i < _glasses.length; i++) {
       _addGlasses(_glasses[i]);
     }
@@ -206,7 +207,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Add a single color to a color palette.
    * @dev This function can only be called by the owner.
    */
-  function addColorToPalette(uint8 _paletteIndex, string calldata _color) external override onlyOwner {
+  function addColorToPalette(uint8 _paletteIndex, string calldata _color) external override onlyRole(DEFAULT_ADMIN_ROLE) {
     require(palettes[_paletteIndex].length <= 255, 'Palettes can only hold 256 colors');
     _addColorToPalette(_paletteIndex, _color);
   }
@@ -215,7 +216,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Add a Noun background.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addBackground(string calldata _background) external override onlyOwner whenPartsNotLocked {
+  function addBackground(string calldata _background) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     _addBackground(_background);
   }
 
@@ -223,7 +224,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Add a Noun body.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addBody(bytes calldata _body) external override onlyOwner whenPartsNotLocked {
+  function addBody(bytes calldata _body) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     _addBody(_body);
   }
 
@@ -231,7 +232,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Add a Noun accessory.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addAccessory(bytes calldata _accessory) external onlyOwner whenPartsNotLocked {
+  function addAccessory(bytes calldata _accessory) external onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     _addAccessory(_accessory);
   }
 
@@ -243,7 +244,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
     uint256 _eventId,
     bytes calldata _head,
     string calldata _name
-  ) external override onlyOwner whenPartsNotLocked {
+  ) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     _addHead(_eventId, _head, _name);
   }
 
@@ -251,7 +252,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Add Noun glasses.
    * @dev This function can only be called by the owner when not locked.
    */
-  function addGlasses(bytes calldata _glasses) external override onlyOwner whenPartsNotLocked {
+  function addGlasses(bytes calldata _glasses) external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     _addGlasses(_glasses);
   }
 
@@ -259,7 +260,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * @notice Lock all Noun parts.
    * @dev This cannot be reversed and can only be called by the owner when not locked.
    */
-  function lockParts() external override onlyOwner whenPartsNotLocked {
+  function lockParts() external override onlyRole(DEFAULT_ADMIN_ROLE) whenPartsNotLocked {
     arePartsLocked = true;
 
     emit PartsLocked();
@@ -270,7 +271,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * or an HTTP URL.
    * @dev This can only be called by the owner.
    */
-  function toggleDataURIEnabled() external override onlyOwner {
+  function toggleDataURIEnabled() external override onlyRole(DEFAULT_ADMIN_ROLE) {
     bool enabled = !isDataURIEnabled;
 
     isDataURIEnabled = enabled;
@@ -283,7 +284,7 @@ contract MarathonNounsDescriptor is INounsDescriptor, Ownable {
    * token ID if {tokenURI} is empty.
    * @dev This can only be called by the owner.
    */
-  function setBaseURI(string calldata _baseURI) external override onlyOwner {
+  function setBaseURI(string calldata _baseURI) external override onlyRole(DEFAULT_ADMIN_ROLE) {
     baseURI = _baseURI;
 
     emit BaseURIUpdated(_baseURI);
