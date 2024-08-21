@@ -1,3 +1,3 @@
 export const addresses = {
-  nftDescriptor:"0x8198f5d8F8CfFE8f9C413d98a0A55aEB8ab9FbB7",
+  nftDescriptor:"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
 }

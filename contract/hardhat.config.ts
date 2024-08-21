@@ -41,6 +41,12 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    amoy: {
+      url: "https://polygon-amoy.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY2,
+      gasMultiplier: 1.3,
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     rinkeby: {
       url: getUrl(),
       accounts:

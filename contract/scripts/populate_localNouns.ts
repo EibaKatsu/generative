@@ -6,7 +6,7 @@ import { addresses } from '../../src/utils/addresses';
 const nounsDescriptor = addresses.nounsDescriptor[network.name];
 
 import { images, palette } from "../test/image-local-data";
-import { abi as localSeederABI } from "../artifacts/contracts/localNouns/LocalNounsSeeder.sol/LocalNounsSeeder";
+// import { abi as localSeederABI } from "../artifacts/contracts/localNouns/LocalNounsSeeder.sol/LocalNounsSeeder";
 import { abi as localNounsDescriptorABI } from "../artifacts/contracts/localNouns/LocalNounsDescriptor.sol/LocalNounsDescriptor";
 import { abi as localProviderABI } from "../artifacts/contracts/localNouns/LocalNounsProvider.sol/LocalNounsProvider";
 import { abi as localTokenABI } from "../artifacts/contracts/LocalNounsToken.sol/LocalNounsToken";
@@ -27,7 +27,7 @@ async function main() {
   const [wallet] = await ethers.getSigners(); // localhost
 
   // ethers.Contract オブジェクトのインスタンスを作成
-  const localSeeder = new ethers.Contract(localSeederAddress, localSeederABI, wallet);
+  // const localSeeder = new ethers.Contract(localSeederAddress, localSeederABI, wallet);
   const localNounsDescriptor = new ethers.Contract(localNounsDescriptorAddress, localNounsDescriptorABI, wallet);
   const localProvider = new ethers.Contract(localProviderAddress, localProviderABI, wallet);
   const localToken = new ethers.Contract(localTokenAddress, localTokenABI, wallet);

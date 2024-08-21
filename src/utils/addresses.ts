@@ -8,6 +8,7 @@ import { addresses as tokenGate_goerli } from "./addresses/tokenGate_goerli";
 import { addresses as tokenGate_localhost } from "./addresses/tokenGate_localhost";
 import { addresses as tokenGate_mainnet } from "./addresses/tokenGate_mainnet";
 import { addresses as tokenGate_mumbai } from "./addresses/tokenGate_mumbai";
+import { addresses as tokenGate_amoy } from "./addresses/tokenGate_amoy";
 import { addresses as sample_goerli } from "./addresses/sample_goerli";
 import { addresses as sample_localhost } from "./addresses/sample_localhost";
 import { addresses as nouns_goerli } from "./addresses/nouns_goerli";
@@ -81,26 +82,33 @@ import { addresses as messagetoken_goerli } from "./addresses/messagetoken_goerl
 import { addresses as messagetoken_localhost } from "./addresses/messagetoken_localhost";
 import { addresses as messagetoken_mumbai } from "./addresses/messagetoken_mumbai";
 import { addresses as nounsDescriptor_mumbai } from "./addresses/nounsDescriptor_mumbai";
+import { addresses as nounsDescriptor_amoy } from "./addresses/nounsDescriptor_amoy";
 import { addresses as nounsDescriptor_mainnet } from "./addresses/nounsDescriptor_mainnet";
 import { addresses as nounsDescriptor_localhost } from "./addresses/nounsDescriptor_localhost";
 import { addresses as nounsSeeder_mumbai } from "./addresses/nounsSeeder_mumbai";
+import { addresses as nounsSeeder_amoy } from "./addresses/nounsSeeder_amoy";
 import { addresses as nounsSeeder_localhost } from "./addresses/nounsSeeder_localhost";
 import { addresses as nftDescriptor_mainnet } from "./addresses/nftDescriptor_mainnet";
 import { addresses as nftDescriptor_mumbai } from "./addresses/nftDescriptor_mumbai";
+import { addresses as nftDescriptor_amoy } from "./addresses/nftDescriptor_amoy";
 import { addresses as nftDescriptor_localhost } from "./addresses/nftDescriptor_localhost";
 import { addresses as localSeeder_mumbai } from "./addresses/localseeder_mumbai";
 import { addresses as localSeeder_localhost } from "./addresses/localseeder_localhost";
 import { addresses as localNounsDescriptor_mainnet } from "./addresses/localNounsDescriptor_mainnet";
 import { addresses as localNounsDescriptor_mumbai } from "./addresses/localNounsDescriptor_mumbai";
+import { addresses as localNounsDescriptor_amoy } from "./addresses/localNounsDescriptor_amoy";
 import { addresses as localNounsDescriptor_localhost } from "./addresses/localNounsDescriptor_localhost";
 import { addresses as localProvider_mainnet } from "./addresses/localNounsProvider_mainnet";
 import { addresses as localProvider_mumbai } from "./addresses/localNounsProvider_mumbai";
+import { addresses as localProvider_amoy } from "./addresses/localNounsProvider_amoy";
 import { addresses as localProvider_localhost } from "./addresses/localNounsProvider_localhost";
 import { addresses as localNounsToken_mainnet } from "./addresses/localNounsToken_mainnet";
 import { addresses as localNounsToken_mumbai } from "./addresses/localNounsToken_mumbai";
+import { addresses as localNounsToken_amoy } from "./addresses/localNounsToken_amoy";
 import { addresses as localNounsToken_localhost } from "./addresses/localNounsToken_localhost";
 import { addresses as localNounsMinter_mainnet } from "./addresses/localNounsMinter_mainnet";
 import { addresses as localNounsMinter_mumbai } from "./addresses/localNounsMinter_mumbai";
+import { addresses as localNounsMinter_amoy } from "./addresses/localNounsMinter_amoy";
 import { addresses as localNounsMinter_localhost } from "./addresses/localNounsMinter_localhost";
 import { addresses as MarathonNounsDescriptor_mumbai } from "./addresses/MarathonNounsDescriptor_mumbai";
 import { addresses as MarathonNounsDescriptor_localhost } from "./addresses/MarathonNounsDescriptor_localhost";
@@ -179,6 +187,7 @@ export const addresses: Addresses = {
     localhost: tokenGate_localhost.tokenGate,
     mainnet: tokenGate_mainnet.tokenGate,
     mumbai: tokenGate_mumbai.tokenGate,
+    amoy: tokenGate_amoy.tokenGate,
   },
   nouns: {
     goerli: nouns_goerli.providerAddress,
@@ -333,15 +342,18 @@ export const addresses: Addresses = {
   nounsDescriptor: {
     mainnet: nounsDescriptor_mainnet.nounsDescriptor,
     mumbai: nounsDescriptor_mumbai.nounsDescriptor,
+    amoy: nounsDescriptor_amoy.nounsDescriptor,
     localhost: nounsDescriptor_localhost.nounsDescriptor,
   },
   nounsSeeder: {
     mumbai: nounsSeeder_mumbai.nounsSeeder,
+    amoy: nounsSeeder_amoy.nounsSeeder,
     localhost: nounsSeeder_localhost.nounsSeeder,
   },
   nftDescriptor: {
     mainnet: nftDescriptor_mainnet.nftDescriptor,
     mumbai: nftDescriptor_mumbai.nftDescriptor,
+    amoy: nftDescriptor_amoy.nftDescriptor,
     localhost: nftDescriptor_localhost.nftDescriptor,
   },
 
@@ -352,21 +364,25 @@ export const addresses: Addresses = {
   localNounsDescriptor: {
     mainnet: localNounsDescriptor_mainnet.localNounsDescriptor,
     mumbai: localNounsDescriptor_mumbai.localNounsDescriptor,
+    amoy: localNounsDescriptor_amoy.localNounsDescriptor,
     localhost: localNounsDescriptor_localhost.localNounsDescriptor,
   },
   localProvider: {
     mainnet: localProvider_mainnet.localNounsProvider,
     mumbai: localProvider_mumbai.localNounsProvider,
+    amoy: localProvider_amoy.localNounsProvider,
     localhost: localProvider_localhost.localNounsProvider,
   },
   localNounsToken: {
     mainnet: localNounsToken_mainnet.localNounsToken,
     mumbai: localNounsToken_mumbai.localNounsToken,
+    amoy: localNounsToken_amoy.localNounsToken,
     localhost: localNounsToken_localhost.localNounsToken,
   },
   localNounsMinter: {
     mainnet: localNounsMinter_mainnet.localNounsMinter,
     mumbai: localNounsMinter_mumbai.localNounsMinter,
+    amoy: localNounsMinter_amoy.localNounsMinter,
     localhost: localNounsMinter_localhost.localNounsMinter,
   },
   MarathonNounsDescriptor: {
